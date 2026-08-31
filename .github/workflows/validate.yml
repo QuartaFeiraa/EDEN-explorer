@@ -17,3 +17,19 @@ jobs:
           node --check app-v2.js
           node --check radar-v3.js
           for f in app/*.js; do echo "checking $f"; node --check "$f"; done
+      - name: Check fast boot architecture
+        run: |
+          grep -q "core-v2.js" app/bootstrap.js
+          grep -q "engine-v2.js" app/bootstrap.js
+          grep -q "RUMO_SDK_READY" script.js
+          grep -q "RUMO_CONTESTS_READY" script.js
+          ! grep -q "app-v2.js" script.js
+          ! grep -q "planner-v1.js" script.js
+          ! grep -q "study-tools.js" script.js
+          ! grep -q "sync.js" app/bootstrap.js
+          ! grep -q "radar-v3.js" app/bootstrap.js
+          test -f app/account.js
+          test -f app/core-v2.js
+          test -f app/engine-v2.js
+          test -f app/radar.js
+          echo "Fast boot architecture OK"

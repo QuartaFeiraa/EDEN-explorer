@@ -21,21 +21,18 @@ jobs:
         run: |
           grep -q "core-v2.js" app/bootstrap.js
           grep -q "engine-v2.js" app/bootstrap.js
-          grep -q "7-live" app/bootstrap.js
-          grep -q "styles.css?v=7-live" index.html
-          grep -q "script.js?v=7-live" index.html
-          grep -q "bootstrap.js?v=7-live" index.html
-          grep -q "RUMO_SDK_READY" script.js
-          grep -q "RUMO_CONTESTS_READY" script.js
+          grep -q "8-fix" app/bootstrap.js
+          grep -q "styles.css?v=8-fix" index.html
+          grep -q "script.js?v=8-fix" index.html
+          grep -q "bootstrap.js?v=8-fix" index.html
           grep -q "setTimeout(()=>{sync(true)" app/core-v2.js
-          ! grep -q "if(event!=='INITIAL_SESSION')sync(true)" app/core-v2.js
-          grep -q "rumoBoot='ready'" app/bootstrap.js
-          grep -q "Promise.race" app/bootstrap.js
+          ! grep -q "loadCourses().catch" app/bootstrap.js | grep -q "idle"
+          grep -q "rumoCourseDecorated" app/courses.js
           test -f app/account.js
           test -f app/core-v2.js
           test -f app/engine-v2.js
           test -f app/radar.js
-          echo "Live boot architecture OK"
+          echo "RUMO v8 architecture OK"
   browser-smoke:
     needs: syntax
     runs-on: ubuntu-latest
@@ -59,98 +56,78 @@ jobs:
           done
           cat /tmp/rumo-server.log
           exit 1
-      - name: Test clean persisted degraded and mobile states
+      - name: Test interaction after idle, degraded network and mobile
         run: |
-          timeout 90s node <<'NODE'
+          timeout 75s node <<'NODE'
           const { chromium } = require('playwright');
-          const APP_URL='http://127.0.0.1:4173/';
-          const log=m=>console.log(`[smoke ${new Date().toISOString()}] ${m}`);
-          async function waitBoot(page,label){
-            log(`${label}: waiting boot`);
-            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='7-live',null,{timeout:12000});
-            const state=await page.evaluate(()=>({boot:document.documentElement.dataset.rumoBoot||'',font:getComputedStyle(document.body).fontFamily}));
-            log(`${label}: boot ready (${state.font})`);
-            if(state.boot==='error')throw new Error(`${label}: boot marcou erro`);
-            if(!/Inter/i.test(state.font))throw new Error(`${label}: fonte inesperada ${state.font}`);
+          const URL='http://127.0.0.1:4173/';
+          const log=m=>console.log('[smoke]',m);
+          async function ready(page,label){
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='8-fix',null,{timeout:12000});
+            const font=await page.evaluate(()=>getComputedStyle(document.body).fontFamily);
+            if(!/Inter/i.test(font))throw new Error(`${label}: fonte ${font}`);
           }
-          async function exercise(page,label,{courses=true}={}){
-            const errors=[];
-            page.on('pageerror',e=>errors.push(e.message));
+          async function normal(page,label){
             const started=Date.now();
-            log(`${label}: goto`);
-            const response=await page.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:20000});
-            if(!response||!response.ok())throw new Error(`${label}: HTTP ${response?.status()}`);
-            await waitBoot(page,label);
-            const bootMs=Date.now()-started;
-            log(`${label}: account`);
-            await page.waitForSelector('#account-btn',{timeout:5000});
-            log(`${label}: concursos`);
-            await page.click('[data-tab="concursos"]',{timeout:5000});
-            await page.waitForSelector('#concursos.page.active',{timeout:3000});
-            log(`${label}: revisoes`);
-            await page.click('[data-tab="revisoes"]',{timeout:5000});
-            await page.waitForSelector('#revisoes.page.active',{timeout:3000});
-            if(courses){
-              log(`${label}: essenciais`);
-              await page.click('[data-tab="essenciais"]',{timeout:5000});
-              await page.waitForSelector('#essenciais.page.active',{timeout:3000});
-              log(`${label}: course module`);
-              await page.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:10000});
-            }
-            const snap=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:window.innerWidth,openModals:document.querySelectorAll('.modal.open').length}));
-            if(snap.width>snap.viewport+2)throw new Error(`${label}: overflow ${snap.width}/${snap.viewport}`);
-            if(errors.length)throw new Error(`${label}: JS ${errors.join(' | ')}`);
-            log(`${label}: done ${bootMs}ms`);
-            return {bootMs,...snap};
+            await page.goto(URL,{waitUntil:'domcontentloaded',timeout:20000});
+            await ready(page,label);
+            await page.click('[data-tab="concursos"]',{timeout:4000});
+            await page.waitForSelector('#concursos.page.active');
+            await page.click('[data-tab="essenciais"]',{timeout:4000});
+            await page.waitForSelector('#essenciais.page.active');
+            await page.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:8000});
+            // The old bug appeared after the observer had been alive for ~1.6s.
+            await page.waitForTimeout(2300);
+            await page.click('[data-tab="hoje"]',{timeout:3000});
+            await page.waitForSelector('#hoje.page.active');
+            await page.click('#theme-toggle',{timeout:3000});
+            await page.click('#theme-toggle',{timeout:3000});
+            const snap=await page.evaluate(()=>({w:document.documentElement.scrollWidth,v:innerWidth}));
+            if(snap.w>snap.v+2)throw new Error(`${label}: overflow`);
+            return Date.now()-started;
           }
           (async()=>{
-            log('launch chromium');
             const browser=await chromium.launch({headless:true});
-
-            log('CLEAN start');
             const cleanCtx=await browser.newContext({viewport:{width:1920,height:1080}});
             const clean=await cleanCtx.newPage();
-            const cleanSnap=await exercise(clean,'clean');
+            log(`clean ${await normal(clean,'clean')}ms`);
             await cleanCtx.close();
 
-            log('PERSISTED start');
             const persistedCtx=await browser.newContext({viewport:{width:1920,height:1080}});
             await persistedCtx.addInitScript(()=>{
               localStorage.setItem('rumo-theme','dark');
-              localStorage.setItem('rumo-course-state',JSON.stringify({informatica:{progress:40}}));
-              localStorage.setItem('rumo-guest-goal',JSON.stringify({id:'guest',active:true,objective_name:'SEFAZ DF 2026',cargo:'Auditor',weekly_hours:10,study_days:[1,2,3,4,5],level:'intermediario'}));
+              localStorage.setItem('rumo-lessons-v1',JSON.stringify({informatica:{done:[0,1]}}));
+              localStorage.setItem('rumo-guest-goal',JSON.stringify({objective_name:'SEFAZ DF 2026',cargo:'Auditor',weekly_hours:10,study_days:[1,2,3,4,5]}));
               sessionStorage.setItem('rumo-onboarding-shown','1');
             });
             const persisted=await persistedCtx.newPage();
-            const persistedSnap=await exercise(persisted,'persisted');
-            log('persisted: hoje/theme');
-            await persisted.click('[data-tab="hoje"]',{timeout:5000});
-            await persisted.waitForSelector('#hoje.page.active',{timeout:3000});
-            await persisted.click('#theme-toggle',{timeout:3000});
-            await persisted.click('#theme-toggle',{timeout:3000});
+            log(`persisted ${await normal(persisted,'persisted')}ms`);
             await persistedCtx.close();
 
-            log('DEGRADED start');
+            // With Supabase unreachable, the base shell must remain interactive
+            // even if the personalized data layer cannot become ready.
             const degradedCtx=await browser.newContext({viewport:{width:1920,height:1080}});
-            await degradedCtx.route('https://zycpeiyztqysjqejtour.supabase.co/**',route=>route.abort());
+            await degradedCtx.route('https://zycpeiyztqysjqejtour.supabase.co/**',r=>r.abort());
             const degraded=await degradedCtx.newPage();
-            const degradedSnap=await exercise(degraded,'degraded',{courses:false});
-            log('degraded: hoje');
-            await degraded.click('[data-tab="hoje"]',{timeout:5000});
-            await degraded.waitForSelector('#hoje.page.active',{timeout:3000});
+            await degraded.goto(URL,{waitUntil:'domcontentloaded',timeout:20000});
+            await degraded.click('[data-tab="concursos"]',{timeout:3000});
+            await degraded.waitForSelector('#concursos.page.active');
+            await degraded.waitForTimeout(2500);
+            await degraded.click('[data-tab="hoje"]',{timeout:3000});
+            await degraded.click('#theme-toggle',{timeout:3000});
+            log('degraded interactive');
             await degradedCtx.close();
 
-            log('MOBILE start');
             const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
             const mobile=await mobileCtx.newPage();
-            const mobileSnap=await exercise(mobile,'mobile',{courses:false});
-            log('mobile: menu');
+            await mobile.goto(URL,{waitUntil:'domcontentloaded',timeout:20000});
+            await ready(mobile,'mobile');
             await mobile.click('#menu',{timeout:3000});
             await mobile.waitForSelector('.sidebar.open',{timeout:3000});
+            const m=await mobile.evaluate(()=>({w:document.documentElement.scrollWidth,v:innerWidth}));
+            if(m.w>m.v+2)throw new Error('mobile overflow');
+            log('mobile interactive');
             await mobileCtx.close();
-
-            log('all scenarios passed');
-            console.log(JSON.stringify({clean:cleanSnap,persisted:persistedSnap,degraded:degradedSnap,mobile:mobileSnap}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

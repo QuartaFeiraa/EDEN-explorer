@@ -3,7 +3,7 @@
   const URL='https://zycpeiyztqysjqejtour.supabase.co',KEY='sb_publishable_heHXvAxo36EvgHg_8_XOXQ_rRxE5t5H';
   if(!window.supabase)return;
   const sb=window.supabase.createClient(URL,KEY),state={user:null,goal:null,contest:null,userConcurso:null,materias:[],topicos:[],tasks:[],ready:false};
-  const qs=(s,r=document)=>r.querySelector(s),qsa=(s,r=document)=>[...r.querySelectorAll(s)],escapeHTML=(s='')=>String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[m]));
+  const qs=(s,r=document)=>r.querySelector(s),qsa=(s,r=document)=>[...r.querySelectorAll(s)],escapeHTML=(s='')=>String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt',"'":'&#039;','"':'&quot;'}[m]));
   const today=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`},addDays=(iso,n)=>{const d=new Date(`${iso}T12:00:00`);d.setDate(d.getDate()+n);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`},formatMinutes=m=>{m=Math.max(0,Math.round(Number(m)||0));const h=Math.floor(m/60),min=m%60;return h?`${h}h${min?String(min).padStart(2,'0'):''}`:`${min}min`},daysUntil=iso=>{if(!iso)return null;const d=new Date(`${iso}T12:00:00`),n=new Date();n.setHours(0,0,0,0);return Math.ceil((d-n)/86400000)};
   function toast(msg){let e=qs('.rumo-toast');if(!e){e=document.createElement('div');e.className='rumo-toast';document.body.appendChild(e)}e.textContent=msg;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
   const emit=(name,detail={})=>document.dispatchEvent(new CustomEvent(`rumo:${name}`,{detail}));
@@ -24,5 +24,15 @@
   async function doSync(){const {data:sessionData}=await sb.auth.getSession();state.user=sessionData.session?.user||null;state.contest=null;state.userConcurso=null;if(!state.user){try{state.goal=JSON.parse(localStorage.getItem('rumo-guest-goal')||'null')}catch(_){state.goal=null}state.materias=[];state.topicos=[];state.ready=true;lastSync=Date.now();emit('context',{state});return state}const {data:goal}=await sb.from('user_goals').select('*').eq('user_id',state.user.id).eq('active',true).order('created_at',{ascending:false}).limit(1).maybeSingle();state.goal=goal||null;if(!state.goal){state.materias=[];state.topicos=[];state.ready=true;lastSync=Date.now();emit('context',{state});return state}const contestQ=state.goal.concurso_id?sb.from('concursos').select('*').eq('id',state.goal.concurso_id).maybeSingle():sb.from('concursos').select('*').ilike('nome',state.goal.objective_name).limit(1),ucQ=sb.from('user_concursos').select('*').eq('user_id',state.user.id).eq('principal',true).order('criado_em',{ascending:false}).limit(1).maybeSingle();const [contestRes,ucRes]=await Promise.all([contestQ,ucQ]);state.contest=state.goal.concurso_id?(contestRes.data||null):(contestRes.data?.[0]||null);if(state.contest&&!state.goal.concurso_id){state.goal.concurso_id=state.contest.id;sb.from('user_goals').update({concurso_id:state.contest.id}).eq('id',state.goal.id).then(()=>{})}const patch={cargo:state.goal.cargo||null,prova_data:state.goal.prova_data||null,concurso_id:state.goal.concurso_id||null};if(ucRes.data){state.userConcurso={...ucRes.data,...patch};await sb.from('user_concursos').update(patch).eq('id',ucRes.data.id)}else{const {data}=await sb.from('user_concursos').insert({user_id:state.user.id,...patch,principal:true}).select().single();state.userConcurso=data||null}await loadStructure();state.ready=true;lastSync=Date.now();emit('context',{state});return state}
   function sync(force=false){if(syncing)return syncing;if(!force&&state.ready&&Date.now()-lastSync<15000)return Promise.resolve(state);syncing=doSync().finally(()=>{syncing=null});return syncing}
   window.RUMO={sb,state,qs,qsa,escapeHTML,today,addDays,formatMinutes,daysUntil,toast,emit,templates,templateKey,sync,refreshStructure};
-  sb.auth.onAuthStateChange((event)=>{if(event!=='INITIAL_SESSION')sync(true)});
+
+  // Supabase holds an internal auth lock while this callback runs. Re-entering
+  // auth APIs (getSession) synchronously from here can deadlock an existing login.
+  // Always return first, then synchronize on the next task.
+  let authTimer=null;
+  sb.auth.onAuthStateChange((event,session)=>{
+    state.user=session?.user||null;
+    if(event==='INITIAL_SESSION')return;
+    clearTimeout(authTimer);
+    authTimer=setTimeout(()=>{sync(true).catch(err=>console.warn('RUMO auth sync failed',err))},0);
+  });
 })();

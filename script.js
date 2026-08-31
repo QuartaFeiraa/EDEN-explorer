@@ -80,8 +80,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelec
 renderStudy();renderContests();renderCourses();
 fetch(`${SUPABASE_URL}/rest/v1/concursos?select=*&order=destaque.desc,atualizado_em.desc&limit=50`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(Array.isArray(d)&&d.length){contests=d;renderContests()}}).catch(()=>{});
 
-// Load the account/onboarding layer without introducing a build step.
+// Load account/onboarding and richer radar without introducing a build step.
 (() => {
   const css=document.createElement('link');css.rel='stylesheet';css.href='./v2.css?v=2';document.head.appendChild(css);
+  const radarCss=document.createElement('link');radarCss.rel='stylesheet';radarCss.href='./radar-v3.css?v=1';document.head.appendChild(radarCss);
   const sdk=document.createElement('script');sdk.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';sdk.onload=()=>{const app=document.createElement('script');app.src='./app-v2.js?v=2';document.body.appendChild(app)};document.body.appendChild(sdk);
+  const radar=document.createElement('script');radar.src='./radar-v3.js?v=1';document.body.appendChild(radar);
 })();

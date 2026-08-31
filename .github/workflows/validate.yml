@@ -37,6 +37,7 @@ jobs:
     needs: syntax
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -45,38 +46,82 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --no-save playwright >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Test production in Chromium
+      - name: Start exact commit locally
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/rumo-server.log 2>&1 &
+          echo $! >/tmp/rumo-server.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 0.25
+          done
+          cat /tmp/rumo-server.log
+          exit 1
+      - name: Test desktop and mobile in Chromium
         run: |
           node <<'NODE'
           const { chromium } = require('playwright');
+          const URL='http://127.0.0.1:4173/';
+          async function waitBoot(page){
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='4-fast',{timeout:20000});
+            const state=await page.evaluate(()=>({version:document.documentElement.dataset.rumoVersion,bootError:document.documentElement.dataset.rumoBoot||''}));
+            if(state.bootError==='error')throw new Error('RUMO boot marcou erro');
+            return state;
+          }
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:1920,height:1080}});
-            const errors=[];
-            page.on('pageerror',e=>errors.push(`page: ${e.message}`));
-            page.on('console',m=>{if(m.type()==='error'&&!/favicon/i.test(m.text()))errors.push(`console: ${m.text()}`)});
+
+            const desktopContext=await browser.newContext({viewport:{width:1920,height:1080}});
+            const desktop=await desktopContext.newPage();
+            const desktopErrors=[];
+            desktop.on('pageerror',e=>desktopErrors.push(e.message));
             const started=Date.now();
-            const response=await page.goto('https://orbe-concursos.vercel.app/',{waitUntil:'domcontentloaded',timeout:60000});
-            if(!response||!response.ok())throw new Error(`HTTP ${response?.status()}`);
-            await page.waitForSelector('[data-tab="concursos"]',{timeout:15000});
-            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='4-fast',{timeout:20000});
+            const response=await desktop.goto(URL,{waitUntil:'domcontentloaded',timeout:30000});
+            if(!response||!response.ok())throw new Error(`Desktop HTTP ${response?.status()}`);
+            await waitBoot(desktop);
             const bootMs=Date.now()-started;
-            await page.click('[data-tab="concursos"]');
-            await page.waitForSelector('#concursos.page.active');
-            await page.click('[data-tab="essenciais"]');
-            await page.waitForSelector('#essenciais.page.active');
-            const snapshot=await page.evaluate(()=>({
-              version:document.documentElement.dataset.rumoVersion,
+            if(bootMs>10000)throw new Error(`Boot excessivo: ${bootMs}ms`);
+            await desktop.waitForSelector('#account-btn',{timeout:5000});
+
+            await desktop.click('[data-tab="concursos"]');
+            await desktop.waitForSelector('#concursos.page.active');
+            await desktop.waitForSelector('#all-contests .contest',{timeout:10000});
+            await desktop.waitForSelector('#all-contests .contest .contest-more',{timeout:10000});
+            await desktop.click('#all-contests .contest .contest-more');
+            await desktop.waitForSelector('#contest-detail-modal.open',{timeout:5000});
+            await desktop.click('#contest-detail-close');
+
+            await desktop.click('[data-tab="essenciais"]');
+            await desktop.waitForSelector('#essenciais.page.active');
+            await desktop.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,{timeout:10000});
+            await desktop.click('#course-grid [data-course]');
+            await desktop.waitForSelector('#course-modal.open',{timeout:5000});
+            await desktop.click('#close-course');
+
+            const desk=await desktop.evaluate(()=>({
               contests:document.querySelectorAll('#all-contests .contest').length,
               courses:document.querySelectorAll('#course-grid .course').length,
               width:document.documentElement.scrollWidth,
               viewport:window.innerWidth
             }));
-            if(snapshot.width>snapshot.viewport+2)throw new Error(`Horizontal overflow ${snapshot.width}/${snapshot.viewport}`);
-            if(snapshot.contests<1)throw new Error('Radar sem concursos');
-            if(snapshot.courses<6)throw new Error('Essenciais não renderizados');
-            if(errors.length)throw new Error(errors.join('\n'));
-            console.log(JSON.stringify({bootMs,...snapshot}));
+            if(desk.width>desk.viewport+2)throw new Error(`Desktop overflow ${desk.width}/${desk.viewport}`);
+            if(desktopErrors.length)throw new Error(`Desktop JS: ${desktopErrors.join(' | ')}`);
+
+            const mobileContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const mobile=await mobileContext.newPage();
+            const mobileErrors=[];
+            mobile.on('pageerror',e=>mobileErrors.push(e.message));
+            const mStart=Date.now();
+            const mResponse=await mobile.goto(URL,{waitUntil:'domcontentloaded',timeout:30000});
+            if(!mResponse||!mResponse.ok())throw new Error(`Mobile HTTP ${mResponse?.status()}`);
+            await waitBoot(mobile);
+            const mobileBootMs=Date.now()-mStart;
+            await mobile.click('#menu');
+            await mobile.waitForSelector('.sidebar.open',{timeout:3000});
+            const mob=await mobile.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:window.innerWidth}));
+            if(mob.width>mob.viewport+2)throw new Error(`Mobile overflow ${mob.width}/${mob.viewport}`);
+            if(mobileErrors.length)throw new Error(`Mobile JS: ${mobileErrors.join(' | ')}`);
+
+            console.log(JSON.stringify({bootMs,mobileBootMs,desktop:desk,mobile:mob}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

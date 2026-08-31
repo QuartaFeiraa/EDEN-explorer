@@ -1,7 +1,6 @@
 const SUPABASE_URL='https://zycpeiyztqysjqejtour.supabase.co';
 const SUPABASE_KEY='sb_publishable_heHXvAxo36EvgHg_8_XOXQ_rRxE5t5H';
 
-// Start the only external SDK request immediately, while the static UI becomes interactive.
 window.RUMO_SDK_READY=window.supabase?Promise.resolve(window.supabase):new Promise((resolve,reject)=>{
   const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.async=true;s.onload=()=>resolve(window.supabase);s.onerror=reject;document.head.appendChild(s);
 });
@@ -32,10 +31,18 @@ let courseState=JSON.parse(localStorage.getItem('rumo-course-state')||'{}');
 function statusLabel(s){return ({edital_iminente:'Edital iminente',banca_definida:'Banca definida',previsto:'Previsto',edital_publicado:'Edital publicado',inscricoes_abertas:'Inscrições abertas',prova_marcada:'Prova marcada',encerrado:'Encerrado'})[s]||'Em acompanhamento'}
 function contestHTML(c){return `<article class="contest"><div class="contest-top"><span class="status ${c.status||''}">${statusLabel(c.status)}</span><span class="meta-state">${c.uf||'BR'}</span></div><h3>${c.nome}</h3><p>${c.orgao}</p><div class="meta"><span>${c.banca||'Banca a definir'}</span><span>${c.vagas||'A definir'} vagas</span></div><b class="salary">${c.remuneracao||'Remuneração a definir'}</b></article>`}
 function filtered(){return contests.filter(c=>`${c.nome} ${c.orgao} ${c.area||''} ${c.uf||''}`.toLowerCase().includes(contestQuery)&&(contestStatus==='all'||c.status===contestStatus))}
-function renderContests(){document.querySelector('#featured').innerHTML=contests.slice(0,4).map(contestHTML).join('');document.querySelector('#all-contests').innerHTML=filtered().map(contestHTML).join('')||'<div class="note">Nenhum concurso encontrado com esses filtros.</div>'}
+function renderContests(){
+  document.querySelector('#featured').innerHTML=contests.slice(0,4).map(contestHTML).join('');
+  document.querySelector('#all-contests').innerHTML=filtered().map(contestHTML).join('')||'<div class="note">Nenhum concurso encontrado com esses filtros.</div>';
+  document.dispatchEvent(new CustomEvent('rumo:contest-render'));
+}
 function renderStudy(){const box=document.querySelector('#study-list');box.innerHTML=study.map((s,i)=>`<div class="study"><div class="num">${i+1}</div><div><b>${s[0]}</b><span>${s[1]}</span></div><div class="time">${s[2]} min</div></div>`).join('')}
 function courseHTML(c){const p=courseState[c.id]?.progress||0;return `<article class="course" data-course="${c.id}" style="--course-accent:${c.color}"><div class="course-top"><div class="course-icon">${c.icon}</div><span class="course-tag">GRÁTIS</span></div><h3>${c.title}</h3><p>${c.desc}</p><div class="course-info"><span>${c.days} dias</span><span>${c.min} min/dia</span></div>${p?`<div class="course-progress"><div class="line"><i style="width:${p}%"></i></div><small>${p}% concluído</small></div>`:''}</article>`}
-function renderCourses(category='all'){const list=category==='all'?courses:courses.filter(c=>c.category===category);document.querySelector('#course-grid').innerHTML=list.map(courseHTML).join('')}
+function renderCourses(category='all'){
+  const list=category==='all'?courses:courses.filter(c=>c.category===category);
+  document.querySelector('#course-grid').innerHTML=list.map(courseHTML).join('');
+  document.dispatchEvent(new CustomEvent('rumo:courses-render'));
+}
 function switchTab(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.tab===id));document.querySelector('.sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'auto'});document.dispatchEvent(new CustomEvent('rumo:tab',{detail:{id}}))}
 
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
@@ -51,7 +58,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelec
 
 renderStudy();renderContests();renderCourses();
 
-// One contest request for both cards and the richer Radar module.
 window.RUMO_CONTESTS_READY=fetch(`${SUPABASE_URL}/rest/v1/concursos?select=*&order=destaque.desc,atualizado_em.desc&limit=80`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}})
   .then(r=>r.ok?r.json():Promise.reject(new Error('radar')))
   .then(data=>{if(Array.isArray(data)&&data.length)contests=data;window.RUMO_CONTESTS=contests;renderContests();document.dispatchEvent(new CustomEvent('rumo:contests',{detail:{contests}}));return contests})

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=8-fix">
+  <link rel="stylesheet" href="./styles.css?v=9-stable">
 </head>
 <body>
   <aside class="sidebar">
@@ -54,7 +54,7 @@
     <section id="hoje" class="page active">
       <div class="hero hero-home">
         <div>
-          <div class="eyebrow"><span class="pulse-dot"></span> SEGUNDA-FEIRA · 31 DE AGOSTO</div>
+          <div class="eyebrow"><span class="pulse-dot"></span> HOJE</div>
           <h1>Seu caminho está <em>claro.</em></h1>
           <p>Você não precisa decidir tudo agora. Siga o próximo passo, registre seu progresso e deixe o RUMO reorganizar o restante.</p>
         </div>
@@ -62,47 +62,47 @@
       </div>
 
       <div class="objective-strip">
-        <div><small>OBJETIVO ATUAL</small><b>SEFAZ DF 2026</b></div>
+        <div><small>OBJETIVO ATUAL</small><b>Configure seu objetivo</b></div>
         <div><small>PROVA</small><b>A definir</b></div>
-        <div><small>EDITAL DOMINADO</small><b>43%</b></div>
+        <div><small>RITMO PLANEJADO</small><b>—</b></div>
         <button class="ghost" data-go="meu">Ver meu plano →</button>
       </div>
 
       <div class="dashboard-grid">
         <article class="card activity-card">
-          <div class="card-heading"><div><small>ATIVIDADE DE ESTUDO</small><h2>Seu ritmo esta semana</h2></div><span class="trend positive">+12%</span></div>
+          <div class="card-heading"><div><small>ATIVIDADE DE ESTUDO</small><h2>Seu ritmo esta semana</h2></div><span class="trend">PRÉVIA</span></div>
           <div class="activity-chart" aria-label="Horas estudadas por dia">
-            <div class="bar-day"><i style="--h:48%"></i><span>Seg</span></div>
-            <div class="bar-day"><i style="--h:70%"></i><span>Ter</span></div>
-            <div class="bar-day"><i style="--h:88%"></i><span>Qua</span></div>
-            <div class="bar-day"><i style="--h:67%"></i><span>Qui</span></div>
-            <div class="bar-day"><i style="--h:82%"></i><span>Sex</span></div>
-            <div class="bar-day"><i style="--h:38%"></i><span>Sáb</span></div>
-            <div class="bar-day"><i style="--h:24%"></i><span>Dom</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Seg</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Ter</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Qua</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Qui</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Sex</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Sáb</span></div>
+            <div class="bar-day"><i style="--h:8%"></i><span>Dom</span></div>
           </div>
-          <div class="mini-stats"><div><b>9h20</b><span>esta semana</span></div><div><b>1h52</b><span>média/dia</span></div><div><b>5</b><span>dias ativos</span></div></div>
+          <div class="mini-stats"><div><b>0min</b><span>esta semana</span></div><div><b>0min</b><span>média/dia</span></div><div><b>0</b><span>dias ativos</span></div></div>
         </article>
 
         <article class="card performance-card">
           <small>DESEMPENHO</small>
-          <h2>Você está evoluindo.</h2>
-          <div class="donut"><div><b>76%</b><span>acertos</span></div></div>
-          <div class="metric"><span>Questões resolvidas</span><b>428</b></div>
-          <div class="metric"><span>Melhora em 30 dias</span><b class="good">+8%</b></div>
+          <h2>Seus dados aparecem aqui.</h2>
+          <div class="donut"><div><b>—</b><span>acertos</span></div></div>
+          <div class="metric"><span>Questões resolvidas</span><b>0</b></div>
+          <div class="metric"><span>Sessões nos últimos 7 dias</span><b>0</b></div>
         </article>
 
         <article class="card focus-card">
-          <div class="card-heading"><div><small>SEU FOCO DE HOJE</small><h2>2h15 de estudo</h2></div><div class="progress">0%</div></div>
+          <div class="card-heading"><div><small>SEU FOCO DE HOJE</small><h2>Seu plano de hoje</h2></div><div class="progress">0%</div></div>
           <div id="study-list"></div>
         </article>
 
         <article class="card week-card">
           <small>META SEMANAL</small>
-          <h2>Você está no ritmo.</h2>
-          <div class="hours">9h20 <span>/ 12h</span></div>
-          <div class="goal-bar"><i></i></div>
-          <div class="metric"><span>Consistência</span><b>87%</b></div>
-          <div class="metric"><span>Revisões em dia</span><b>92%</b></div>
+          <h2>Comece pela próxima sessão.</h2>
+          <div class="hours">0min <span>/ —</span></div>
+          <div class="goal-bar"><i style="width:0%"></i></div>
+          <div class="metric"><span>Plano concluído</span><b>—</b></div>
+          <div class="metric"><span>Revisões em dia</span><b>—</b></div>
           <div class="comeback">Perdeu um dia? Sem culpa. O RUMO redistribui seu plano.</div>
         </article>
 
@@ -132,9 +132,7 @@
     <section id="revisoes" class="page">
       <div class="hero compact"><div><div class="eyebrow">MEMÓRIA</div><h1>Revisões <em>inteligentes</em></h1><p>Priorize o que está enfraquecendo antes que vire esquecimento.</p></div></div>
       <div class="review-grid">
-        <article class="review urgent"><span class="review-status">PRIORIDADE ALTA</span><h3>Crase — Português</h3><p>67% de erro nas últimas questões.</p><div class="review-bar"><i style="width:33%"></i></div><button>Revisar agora</button></article>
-        <article class="review"><span class="review-status">HOJE</span><h3>Competência administrativa</h3><p>Última revisão há 7 dias.</p><div class="review-bar"><i style="width:57%"></i></div><button>Revisar agora</button></article>
-        <article class="review"><span class="review-status">ESTA SEMANA</span><h3>Redes e TCP/IP</h3><p>Domínio médio. Mantenha o ritmo.</p><div class="review-bar"><i style="width:72%"></i></div><button>Revisar agora</button></article>
+        <article class="review"><span class="review-status">AGUARDANDO DADOS</span><h3>Suas revisões aparecerão aqui</h3><p>Conclua sessões e questões para o RUMO calcular o que precisa voltar.</p><div class="review-bar"><i style="width:0%"></i></div></article>
       </div>
     </section>
 
@@ -163,7 +161,7 @@
 
   <div id="upgrade-modal" class="modal"><div class="modal-card pricing-modal"><button id="close-upgrade" class="close">×</button><span class="plan-kicker">RUMO PRO</span><h2>Menos planejamento. Mais estudo.</h2><p>Planejamento adaptativo, edital inteligente, assistente contextual, caderno de erros e análises completas.</p><div class="price-options"><button class="price-card selected"><span>Mensal</span><b>R$ 24,90</b><small>por mês</small></button><button class="price-card"><span>Anual</span><b>R$ 199</b><small>por ano · melhor valor</small></button></div><button class="primary full">Usar o beta grátis</button></div></div>
 
-  <script src="./script.js?v=8-fix"></script>
-  <script src="./app/bootstrap.js?v=8-fix"></script>
+  <script src="./script.js?v=9-stable"></script>
+  <script src="./app/bootstrap.js?v=9-stable"></script>
 </body>
 </html>

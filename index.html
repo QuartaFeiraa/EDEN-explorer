@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#0b1020">
   <title>RUMO — Seu caminho até a aprovação</title>
   <meta name="description" content="RUMO organiza concursos, rotina, revisões e habilidades essenciais em um caminho simples de seguir.">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
@@ -122,7 +124,7 @@
       <div class="hero compact"><div><div class="eyebrow">SEU OBJETIVO</div><h1>Monte seu <em>plano de aprovação</em></h1><p>Escolha um concurso ou envie o edital. O RUMO transforma matérias, tempo disponível e prioridade em uma trilha simples.</p></div></div>
       <div class="setup-grid">
         <article class="setup-card featured-setup"><span>01</span><h3>Escolha seu concurso</h3><p>Use nosso radar ou cadastre um objetivo manualmente.</p><button class="primary" data-go="concursos">Explorar concursos</button></article>
-        <article class="setup-card"><span>02</span><h3>Envie o edital</h3><p>Em breve: leitura automática do PDF e criação do conteúdo programático.</p><button class="secondary">Enviar PDF</button></article>
+        <article class="setup-card"><span>02</span><h3>Envie o edital</h3><p>O RUMO lê o conteúdo programático localmente e transforma o PDF em matérias e tópicos.</p><button class="secondary">Enviar PDF</button></article>
         <article class="setup-card"><span>03</span><h3>Conte sua rotina</h3><p>Defina dias e horas disponíveis. O plano se adapta quando sua semana muda.</p><button class="secondary">Configurar rotina</button></article>
       </div>
     </section>
@@ -148,11 +150,9 @@
     <section id="ia" class="page">
       <div class="hero compact"><div><div class="eyebrow">ASSISTENTE</div><h1>Uma IA que conhece <em>seus estudos.</em></h1><p>O diferencial não é só responder perguntas: é usar seu objetivo, progresso, erros e tempo disponível para orientar o próximo passo.</p></div></div>
       <article class="assistant">
-        <div class="assistant-head"><div class="ai-orb">✦</div><div><b>Assistente RUMO</b><span>Modo demonstração</span></div></div>
-        <div class="bubble">Olá! Posso reorganizar sua rotina, explicar um assunto de outra forma ou transformar seus erros em uma revisão.</div>
-        <div class="chips"><button>O que estudar hoje?</button><button>Reorganize minha semana</button><button>Quais são meus pontos fracos?</button><button>Explique crase de outro jeito</button></div>
+        <div class="assistant-head"><div class="ai-orb">✦</div><div><b>Assistente RUMO</b><span>Preparando contexto...</span></div></div>
+        <div class="bubble">Carregando seu plano e desempenho.</div>
         <div class="chat"><input placeholder="Digite sua pergunta..."><button>↑</button></div>
-        <small class="muted">A IA real será conectada na próxima etapa da v1.</small>
       </article>
     </section>
   </main>
@@ -161,8 +161,9 @@
 
   <div id="course-modal" class="modal"><div class="modal-card course-modal-card"><button id="close-course" class="close">×</button><div id="course-modal-content"></div></div></div>
 
-  <div id="upgrade-modal" class="modal"><div class="modal-card pricing-modal"><button id="close-upgrade" class="close">×</button><span class="plan-kicker">RUMO PRO</span><h2>Menos planejamento. Mais estudo.</h2><p>Planejamento adaptativo, edital inteligente, IA contextual, caderno de erros e análises completas.</p><div class="price-options"><button class="price-card selected"><span>Mensal</span><b>R$ 24,90</b><small>por mês</small></button><button class="price-card"><span>Anual</span><b>R$ 199</b><small>por ano · melhor valor</small></button></div><button class="primary full">Assinaturas entram na próxima etapa</button></div></div>
+  <div id="upgrade-modal" class="modal"><div class="modal-card pricing-modal"><button id="close-upgrade" class="close">×</button><span class="plan-kicker">RUMO PRO</span><h2>Menos planejamento. Mais estudo.</h2><p>Planejamento adaptativo, edital inteligente, assistente contextual, caderno de erros e análises completas.</p><div class="price-options"><button class="price-card selected"><span>Mensal</span><b>R$ 24,90</b><small>por mês</small></button><button class="price-card"><span>Anual</span><b>R$ 199</b><small>por ano · melhor valor</small></button></div><button class="primary full">Usar o beta grátis</button></div></div>
 
   <script src="./script.js"></script>
+  <script src="./app/bootstrap.js?v=1"></script>
 </body>
 </html>

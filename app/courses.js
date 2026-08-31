@@ -121,12 +121,18 @@
     const r=R(),grid=r.qs('#course-grid');
     if(!grid)return;
     r.qsa('[data-course]',grid).forEach(card=>{
+      // MutationObserver watches the same grid. Mark each newly-rendered card
+      // before modifying descendants so our own DOM changes cannot re-trigger
+      // an endless decorate -> mutation -> decorate feedback loop.
+      if(card.dataset.rumoCourseDecorated==='1')return;
+      card.dataset.rumoCourseDecorated='1';
       const id=card.dataset.course,ready=!!courses[id],badge=card.querySelector('.course-tag');
       if(badge){
-        badge.textContent=ready?'GRÁTIS · PRONTO':'EM BREVE';
-        if(!ready)badge.style.color='var(--muted)';
+        const label=ready?'GRÁTIS · PRONTO':'EM BREVE';
+        if(badge.textContent!==label)badge.textContent=label;
+        if(!ready&&badge.style.color!=='var(--muted)')badge.style.color='var(--muted)';
       }
-      if(ready&&progress(id))syncProgress(id);
+      if(ready&&progress(id))void syncProgress(id).catch(()=>{});
     });
   }
 

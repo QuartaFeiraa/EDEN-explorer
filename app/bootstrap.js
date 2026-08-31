@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const RELEASE='7-live';
+  const RELEASE='8-fix';
   const loaded=new Map();
   const addCss=href=>{if(document.querySelector(`link[href^="${href}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${RELEASE}`;document.head.appendChild(l)};
   const loadScript=src=>{if(loaded.has(src))return loaded.get(src);const p=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=`${src}?v=${RELEASE}`;s.async=true;s.onload=()=>resolve(s);s.onerror=()=>reject(new Error(`Falha ao carregar ${src}`));document.body.appendChild(s)});loaded.set(src,p);return p};
@@ -23,8 +23,6 @@
         loadScript('./app/edital.js')
       ]);
 
-      // A interface fica pronta antes de qualquer consulta de dados pessoais.
-      // Assim uma rede lenta ou sessão problemática nunca bloqueia os cliques.
       document.documentElement.dataset.rumoVersion=RELEASE;
       document.documentElement.dataset.rumoBoot='ready';
       document.dispatchEvent(new CustomEvent('rumo:booted'));
@@ -41,12 +39,14 @@
 
   Promise.resolve(window.RUMO_CONTESTS_READY).finally(()=>loadScript('./app/radar.js').catch(()=>{}));
 
+  // Essenciais is truly lazy. It must never consume the dashboard's main
+  // thread unless the user actually enters the course area.
   let coursesReady=null;
   const loadCourses=()=>coursesReady||(coursesReady=loadScript('./app/courses.js'));
   document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='essenciais')loadCourses().catch(()=>{})});
   document.addEventListener('click',e=>{const card=e.target.closest?.('#course-grid [data-course]');if(card&&!window.RUMO_COURSES){e.preventDefault();e.stopImmediatePropagation();loadCourses().then(()=>window.RUMO_COURSES?.open(card.dataset.course)).catch(()=>{})}},true);
 
   const idle=window.requestIdleCallback||((fn)=>setTimeout(fn,1200));
-  idle(()=>{loadCourses().catch(()=>{});loadScript('./app/billing.js').catch(()=>{})},{timeout:3500});
+  idle(()=>loadScript('./app/billing.js').catch(()=>{}),{timeout:3500});
   boot();
 })();

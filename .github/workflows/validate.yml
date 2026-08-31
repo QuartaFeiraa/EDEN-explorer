@@ -51,7 +51,7 @@ jobs:
           const { chromium } = require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:1920,height:1080});
+            const page=await browser.newPage({viewport:{width:1920,height:1080}});
             const errors=[];
             page.on('pageerror',e=>errors.push(`page: ${e.message}`));
             page.on('console',m=>{if(m.type()==='error'&&!/favicon/i.test(m.text()))errors.push(`console: ${m.text()}`)});

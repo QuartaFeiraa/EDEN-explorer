@@ -33,3 +33,50 @@ jobs:
           test -f app/engine-v2.js
           test -f app/radar.js
           echo "Fast boot architecture OK"
+  browser-smoke:
+    needs: syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Test production in Chromium
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1920,height:1080});
+            const errors=[];
+            page.on('pageerror',e=>errors.push(`page: ${e.message}`));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon/i.test(m.text()))errors.push(`console: ${m.text()}`)});
+            const started=Date.now();
+            const response=await page.goto('https://orbe-concursos.vercel.app/',{waitUntil:'domcontentloaded',timeout:60000});
+            if(!response||!response.ok())throw new Error(`HTTP ${response?.status()}`);
+            await page.waitForSelector('[data-tab="concursos"]',{timeout:15000});
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='4-fast',{timeout:20000});
+            const bootMs=Date.now()-started;
+            await page.click('[data-tab="concursos"]');
+            await page.waitForSelector('#concursos.page.active');
+            await page.click('[data-tab="essenciais"]');
+            await page.waitForSelector('#essenciais.page.active');
+            const snapshot=await page.evaluate(()=>({
+              version:document.documentElement.dataset.rumoVersion,
+              contests:document.querySelectorAll('#all-contests .contest').length,
+              courses:document.querySelectorAll('#course-grid .course').length,
+              width:document.documentElement.scrollWidth,
+              viewport:window.innerWidth
+            }));
+            if(snapshot.width>snapshot.viewport+2)throw new Error(`Horizontal overflow ${snapshot.width}/${snapshot.viewport}`);
+            if(snapshot.contests<1)throw new Error('Radar sem concursos');
+            if(snapshot.courses<6)throw new Error('Essenciais não renderizados');
+            if(errors.length)throw new Error(errors.join('\n'));
+            console.log(JSON.stringify({bootMs,...snapshot}));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE

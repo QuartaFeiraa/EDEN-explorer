@@ -1,1 +1,168 @@
-<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0e1220"><title>Orbe Concursos</title><meta name="description" content="Planejamento inteligente para concursos"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="./styles.css"></head><body><aside class="sidebar"><div class="brand"><div class="mark">O</div><div><strong>ORBE</strong><span>concursos</span></div></div><nav><button class="nav active" data-tab="hoje">Hoje</button><button class="nav" data-tab="concursos">Concursos</button><button class="nav" data-tab="meu">Meu concurso</button><button class="nav" data-tab="revisoes">Revisões</button><button class="nav" data-tab="ia">Assistente IA</button></nav><div class="pro"><b>Plano Pro</b><span>teste premium ativo</span></div></aside><main><header><button id="menu">☰</button><span class="mobile-logo">ORBE</span><div class="user">NS</div></header><section id="hoje" class="page active"><div class="hero"><div><small>SEGUNDA-FEIRA · 31 DE AGOSTO</small><h1>Seu caminho está <em>claro.</em></h1><p>Hoje você tem 2h15 planejadas. Foque no essencial e deixe o resto com a plataforma.</p></div><button class="dark" id="open-ai">✦ Perguntar à IA</button></div><div class="layout"><article class="card focus"><div class="card-title"><div><small>SEU FOCO DE HOJE</small><h2>2h15 de estudo</h2></div><div class="progress">0%</div></div><div id="study-list"></div></article><article class="card week"><small>SEMANA</small><h2>Você está no ritmo.</h2><div class="hours">9h20 <span>/ 12h</span></div><div class="bar"><i></i></div><div class="metric"><span>Consistência</span><b>87%</b></div><div class="metric"><span>Edital dominado</span><b>43%</b></div></article><article class="card radar"><div class="card-title"><div><small>RADAR DE CONCURSOS</small><h2>Próximos concursos</h2></div><button class="link" data-go="concursos">Ver todos →</button></div><div id="featured" class="contest-grid four"></div></article></div></section><section id="concursos" class="page"><div class="hero compact"><div><small>OPORTUNIDADES</small><h1>Radar de <em>concursos</em></h1><p>Concursos previstos, bancas definidas e editais próximos em um só lugar.</p></div></div><div class="search"><input id="search" placeholder="Buscar órgão, estado ou área..."></div><div id="all-contests" class="contest-grid"></div><p class="note">Radar informativo. Sempre confirme datas, vagas e requisitos no edital e no site oficial do órgão.</p></section><section id="meu" class="page"><div class="hero compact"><div><small>SEU OBJETIVO</small><h1>Monte seu <em>plano de aprovação</em></h1><p>Escolha um concurso ou envie um edital para transformar o conteúdo programático em um plano de estudo.</p></div></div><article class="empty"><div class="plus">+</div><h2>Adicionar meu concurso</h2><p>Escolha um concurso do radar ou envie o edital em PDF.</p><button class="dark">Adicionar concurso</button></article></section><section id="revisoes" class="page"><div class="hero compact"><div><small>MEMÓRIA</small><h1>Revisões <em>inteligentes</em></h1><p>O sistema prioriza o que você está prestes a esquecer.</p></div></div><div class="review-grid"><article class="review red"><small>PRIORIDADE ALTA</small><h3>Crase — Português</h3><p>67% de erro nas últimas questões.</p><button>Revisar agora</button></article><article class="review"><small>HOJE</small><h3>Competência administrativa</h3><p>Última revisão há 7 dias.</p><button>Revisar agora</button></article><article class="review"><small>ESTA SEMANA</small><h3>Redes e TCP/IP</h3><p>Domínio médio. Mantenha o ritmo.</p><button>Revisar agora</button></article></div></section><section id="ia" class="page"><div class="hero compact"><div><small>ASSISTENTE</small><h1>Uma IA que conhece <em>seus estudos</em></h1><p>Planejamento, explicações e revisão com contexto do seu concurso.</p></div></div><article class="assistant"><div class="bubble">Olá! Posso reorganizar sua rotina, explicar uma questão ou montar uma revisão.</div><div class="chips"><button>O que estudar hoje?</button><button>Reorganize minha semana</button><button>Quais são meus pontos fracos?</button></div><div class="chat"><input placeholder="Digite sua pergunta..."><button>↑</button></div><small class="muted">A interface está pronta; a resposta real da IA será conectada via API.</small></article></section></main><div id="modal" class="modal"><div class="modal-card"><button id="close-ai" class="close">×</button><div class="ai-mark">✦</div><h2>Seu assistente de estudos</h2><p>Ele usa seu concurso, rotina, progresso e erros para orientar o próximo passo.</p><div class="chips vertical"><button>O que devo priorizar hoje?</button><button>Reorganize minha semana</button><button>Crie uma revisão dos meus erros</button></div><div class="chat"><input placeholder="Pergunte sobre seus estudos..."><button>↑</button></div></div></div><script src="./script.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>RUMO — Seu caminho até a aprovação</title>
+  <meta name="description" content="RUMO organiza concursos, rotina, revisões e habilidades essenciais em um caminho simples de seguir.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand" aria-label="RUMO">
+      <svg class="brand-icon" viewBox="0 0 80 80" aria-hidden="true">
+        <defs><linearGradient id="rumoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18b8ff"/><stop offset=".48" stop-color="#3677ff"/><stop offset="1" stop-color="#6d45ff"/></linearGradient></defs>
+        <circle cx="28" cy="17" r="8" fill="url(#rumoGradient)"/>
+        <path d="M18 38c13-11 39-12 46-5 6 7-5 13-17 16-12 3-23 6-25 13-1 4 1 7 5 10H13c-7-7-8-15-3-22 5-7 15-10 29-13 10-2 16-4 15-7-1-2-12-2-24 2-6 2-9 4-12 6z" fill="url(#rumoGradient)"/>
+      </svg>
+      <div class="brand-copy"><strong>RUMO</strong><span>estudos & concursos</span></div>
+    </div>
+
+    <nav>
+      <button class="nav active" data-tab="hoje"><span class="nav-icon">⌂</span>Hoje</button>
+      <button class="nav" data-tab="concursos"><span class="nav-icon">◎</span>Concursos</button>
+      <button class="nav" data-tab="meu"><span class="nav-icon">◇</span>Meu concurso</button>
+      <button class="nav" data-tab="revisoes"><span class="nav-icon">↻</span>Revisões</button>
+      <button class="nav" data-tab="essenciais"><span class="nav-icon">✦</span>Essenciais <span class="free-badge">GRÁTIS</span></button>
+      <button class="nav" data-tab="ia"><span class="nav-icon">✧</span>Assistente IA</button>
+    </nav>
+
+    <div class="pro-card">
+      <span>RUMO PRO</span>
+      <b>Seu plano se adapta a você.</b>
+      <button id="upgrade-btn">Conhecer o Pro</button>
+    </div>
+    <div class="eden-footer">EDEN</div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <button id="menu" aria-label="Abrir menu">☰</button>
+      <span class="mobile-logo">RUMO</span>
+      <div class="top-actions">
+        <button id="theme-toggle" class="icon-btn" aria-label="Alternar tema"><span id="theme-icon">☀</span></button>
+        <div class="user">NS</div>
+      </div>
+    </header>
+
+    <section id="hoje" class="page active">
+      <div class="hero hero-home">
+        <div>
+          <div class="eyebrow"><span class="pulse-dot"></span> SEGUNDA-FEIRA · 31 DE AGOSTO</div>
+          <h1>Seu caminho está <em>claro.</em></h1>
+          <p>Você não precisa decidir tudo agora. Siga o próximo passo, registre seu progresso e deixe o RUMO reorganizar o restante.</p>
+        </div>
+        <button class="primary" id="open-ai">✦ Perguntar à IA</button>
+      </div>
+
+      <div class="objective-strip">
+        <div><small>OBJETIVO ATUAL</small><b>SEFAZ DF 2026</b></div>
+        <div><small>PROVA</small><b>A definir</b></div>
+        <div><small>EDITAL DOMINADO</small><b>43%</b></div>
+        <button class="ghost" data-go="meu">Ver meu plano →</button>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="card activity-card">
+          <div class="card-heading"><div><small>ATIVIDADE DE ESTUDO</small><h2>Seu ritmo esta semana</h2></div><span class="trend positive">+12%</span></div>
+          <div class="activity-chart" aria-label="Horas estudadas por dia">
+            <div class="bar-day"><i style="--h:48%"></i><span>Seg</span></div>
+            <div class="bar-day"><i style="--h:70%"></i><span>Ter</span></div>
+            <div class="bar-day"><i style="--h:88%"></i><span>Qua</span></div>
+            <div class="bar-day"><i style="--h:67%"></i><span>Qui</span></div>
+            <div class="bar-day"><i style="--h:82%"></i><span>Sex</span></div>
+            <div class="bar-day"><i style="--h:38%"></i><span>Sáb</span></div>
+            <div class="bar-day"><i style="--h:24%"></i><span>Dom</span></div>
+          </div>
+          <div class="mini-stats"><div><b>9h20</b><span>esta semana</span></div><div><b>1h52</b><span>média/dia</span></div><div><b>5</b><span>dias ativos</span></div></div>
+        </article>
+
+        <article class="card performance-card">
+          <small>DESEMPENHO</small>
+          <h2>Você está evoluindo.</h2>
+          <div class="donut"><div><b>76%</b><span>acertos</span></div></div>
+          <div class="metric"><span>Questões resolvidas</span><b>428</b></div>
+          <div class="metric"><span>Melhora em 30 dias</span><b class="good">+8%</b></div>
+        </article>
+
+        <article class="card focus-card">
+          <div class="card-heading"><div><small>SEU FOCO DE HOJE</small><h2>2h15 de estudo</h2></div><div class="progress">0%</div></div>
+          <div id="study-list"></div>
+        </article>
+
+        <article class="card week-card">
+          <small>META SEMANAL</small>
+          <h2>Você está no ritmo.</h2>
+          <div class="hours">9h20 <span>/ 12h</span></div>
+          <div class="goal-bar"><i></i></div>
+          <div class="metric"><span>Consistência</span><b>87%</b></div>
+          <div class="metric"><span>Revisões em dia</span><b>92%</b></div>
+          <div class="comeback">Perdeu um dia? Sem culpa. O RUMO redistribui seu plano.</div>
+        </article>
+
+        <article class="card radar-card">
+          <div class="card-heading"><div><small>RADAR DE CONCURSOS</small><h2>Próximas oportunidades</h2></div><button class="text-link" data-go="concursos">Ver todos →</button></div>
+          <div id="featured" class="contest-grid four"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="concursos" class="page">
+      <div class="hero compact"><div><div class="eyebrow">OPORTUNIDADES</div><h1>Radar de <em>concursos</em></h1><p>Concursos previstos, bancas definidas e editais próximos em um único lugar. Use o radar para escolher seu próximo objetivo.</p></div></div>
+      <div class="toolbar"><div class="search"><span>⌕</span><input id="search" placeholder="Buscar órgão, estado ou área..."></div><select id="contest-filter"><option value="all">Todos</option><option value="edital_iminente">Edital iminente</option><option value="banca_definida">Banca definida</option><option value="previsto">Previsto</option></select></div>
+      <div id="all-contests" class="contest-grid"></div>
+      <p class="note">Radar informativo. Confirme datas, vagas e requisitos no edital e no site oficial do órgão.</p>
+    </section>
+
+    <section id="meu" class="page">
+      <div class="hero compact"><div><div class="eyebrow">SEU OBJETIVO</div><h1>Monte seu <em>plano de aprovação</em></h1><p>Escolha um concurso ou envie o edital. O RUMO transforma matérias, tempo disponível e prioridade em uma trilha simples.</p></div></div>
+      <div class="setup-grid">
+        <article class="setup-card featured-setup"><span>01</span><h3>Escolha seu concurso</h3><p>Use nosso radar ou cadastre um objetivo manualmente.</p><button class="primary" data-go="concursos">Explorar concursos</button></article>
+        <article class="setup-card"><span>02</span><h3>Envie o edital</h3><p>Em breve: leitura automática do PDF e criação do conteúdo programático.</p><button class="secondary">Enviar PDF</button></article>
+        <article class="setup-card"><span>03</span><h3>Conte sua rotina</h3><p>Defina dias e horas disponíveis. O plano se adapta quando sua semana muda.</p><button class="secondary">Configurar rotina</button></article>
+      </div>
+    </section>
+
+    <section id="revisoes" class="page">
+      <div class="hero compact"><div><div class="eyebrow">MEMÓRIA</div><h1>Revisões <em>inteligentes</em></h1><p>Priorize o que está enfraquecendo antes que vire esquecimento.</p></div></div>
+      <div class="review-grid">
+        <article class="review urgent"><span class="review-status">PRIORIDADE ALTA</span><h3>Crase — Português</h3><p>67% de erro nas últimas questões.</p><div class="review-bar"><i style="width:33%"></i></div><button>Revisar agora</button></article>
+        <article class="review"><span class="review-status">HOJE</span><h3>Competência administrativa</h3><p>Última revisão há 7 dias.</p><div class="review-bar"><i style="width:57%"></i></div><button>Revisar agora</button></article>
+        <article class="review"><span class="review-status">ESTA SEMANA</span><h3>Redes e TCP/IP</h3><p>Domínio médio. Mantenha o ritmo.</p><div class="review-bar"><i style="width:72%"></i></div><button>Revisar agora</button></article>
+      </div>
+    </section>
+
+    <section id="essenciais" class="page">
+      <div class="hero essentials-hero">
+        <div><div class="eyebrow">100% GRÁTIS</div><h1>Aprenda o que é <em>essencial.</em></h1><p>Cursos curtos e práticos para trabalho, provas e vida digital. Sem maratona interminável: poucos minutos por dia e progresso visível.</p></div>
+        <div class="essentials-highlight"><b>15–25 min</b><span>por dia é suficiente</span></div>
+      </div>
+      <div class="course-filters"><button class="course-filter active" data-course-filter="all">Todos</button><button class="course-filter" data-course-filter="trabalho">Trabalho</button><button class="course-filter" data-course-filter="provas">Provas</button><button class="course-filter" data-course-filter="idiomas">Idiomas</button></div>
+      <div id="course-grid" class="course-grid"></div>
+    </section>
+
+    <section id="ia" class="page">
+      <div class="hero compact"><div><div class="eyebrow">ASSISTENTE</div><h1>Uma IA que conhece <em>seus estudos.</em></h1><p>O diferencial não é só responder perguntas: é usar seu objetivo, progresso, erros e tempo disponível para orientar o próximo passo.</p></div></div>
+      <article class="assistant">
+        <div class="assistant-head"><div class="ai-orb">✦</div><div><b>Assistente RUMO</b><span>Modo demonstração</span></div></div>
+        <div class="bubble">Olá! Posso reorganizar sua rotina, explicar um assunto de outra forma ou transformar seus erros em uma revisão.</div>
+        <div class="chips"><button>O que estudar hoje?</button><button>Reorganize minha semana</button><button>Quais são meus pontos fracos?</button><button>Explique crase de outro jeito</button></div>
+        <div class="chat"><input placeholder="Digite sua pergunta..."><button>↑</button></div>
+        <small class="muted">A IA real será conectada na próxima etapa da v1.</small>
+      </article>
+    </section>
+  </main>
+
+  <div id="modal" class="modal"><div class="modal-card"><button id="close-ai" class="close">×</button><div class="ai-orb large">✦</div><h2>Seu assistente de estudos</h2><p>Ele usa seu concurso, rotina, progresso e erros para indicar o melhor próximo passo.</p><div class="chips vertical"><button>O que devo priorizar hoje?</button><button>Reorganize minha semana</button><button>Crie uma revisão dos meus erros</button></div><div class="chat"><input placeholder="Pergunte sobre seus estudos..."><button>↑</button></div></div></div>
+
+  <div id="course-modal" class="modal"><div class="modal-card course-modal-card"><button id="close-course" class="close">×</button><div id="course-modal-content"></div></div></div>
+
+  <div id="upgrade-modal" class="modal"><div class="modal-card pricing-modal"><button id="close-upgrade" class="close">×</button><span class="plan-kicker">RUMO PRO</span><h2>Menos planejamento. Mais estudo.</h2><p>Planejamento adaptativo, edital inteligente, IA contextual, caderno de erros e análises completas.</p><div class="price-options"><button class="price-card selected"><span>Mensal</span><b>R$ 24,90</b><small>por mês</small></button><button class="price-card"><span>Anual</span><b>R$ 199</b><small>por ano · melhor valor</small></button></div><button class="primary full">Assinaturas entram na próxima etapa</button></div></div>
+
+  <script src="./script.js"></script>
+</body>
+</html>

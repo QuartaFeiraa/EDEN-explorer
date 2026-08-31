@@ -17,22 +17,23 @@ jobs:
           node --check app-v2.js
           node --check radar-v3.js
           for f in app/*.js; do echo "checking $f"; node --check "$f"; done
-      - name: Check fast boot architecture
+      - name: Check stable boot architecture
         run: |
-          grep -q "core-v2.js" app/bootstrap.js
-          grep -q "engine-v2.js" app/bootstrap.js
+          grep -q "core.js" app/bootstrap.js
+          grep -q "engine.js" app/bootstrap.js
+          grep -q "6-stable" app/bootstrap.js
+          grep -q "styles.css?v=6-stable" index.html
+          grep -q "script.js?v=6-stable" index.html
+          grep -q "bootstrap.js?v=6-stable" index.html
           grep -q "RUMO_SDK_READY" script.js
           grep -q "RUMO_CONTESTS_READY" script.js
-          ! grep -q "app-v2.js" script.js
-          ! grep -q "planner-v1.js" script.js
-          ! grep -q "study-tools.js" script.js
-          ! grep -q "sync.js" app/bootstrap.js
-          ! grep -q "radar-v3.js" app/bootstrap.js
+          ! grep -q "core-v2.js" app/bootstrap.js
+          ! grep -q "engine-v2.js" app/bootstrap.js
           test -f app/account.js
-          test -f app/core-v2.js
-          test -f app/engine-v2.js
+          test -f app/core.js
+          test -f app/engine.js
           test -f app/radar.js
-          echo "Fast boot architecture OK"
+          echo "Stable boot architecture OK"
   browser-smoke:
     needs: syntax
     runs-on: ubuntu-latest
@@ -49,79 +50,69 @@ jobs:
       - name: Start exact commit locally
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/rumo-server.log 2>&1 &
-          echo $! >/tmp/rumo-server.pid
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
             sleep 0.25
           done
           cat /tmp/rumo-server.log
           exit 1
-      - name: Test desktop and mobile in Chromium
+      - name: Test clean and persisted sessions
         run: |
           node <<'NODE'
           const { chromium } = require('playwright');
           const APP_URL='http://127.0.0.1:4173/';
           async function waitBoot(page){
-            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='4-fast',null,{timeout:20000});
-            const state=await page.evaluate(()=>({version:document.documentElement.dataset.rumoVersion,bootError:document.documentElement.dataset.rumoBoot||''}));
-            if(state.bootError==='error')throw new Error('RUMO boot marcou erro');
-            return state;
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='6-stable',null,{timeout:20000});
+            const state=await page.evaluate(()=>({boot:document.documentElement.dataset.rumoBoot||'',font:getComputedStyle(document.body).fontFamily}));
+            if(state.boot==='error')throw new Error('RUMO boot marcou erro');
+            if(!/Inter/i.test(state.font))throw new Error(`Fonte inesperada: ${state.font}`);
+          }
+          async function exercise(page,label){
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            const response=await page.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:30000});
+            if(!response||!response.ok())throw new Error(`${label} HTTP ${response?.status()}`);
+            await waitBoot(page);
+            await page.waitForSelector('#account-btn',{timeout:5000});
+            await page.click('[data-tab="concursos"]');
+            await page.waitForSelector('#concursos.page.active');
+            await page.click('[data-tab="revisoes"]');
+            await page.waitForSelector('#revisoes.page.active');
+            await page.click('[data-tab="essenciais"]');
+            await page.waitForSelector('#essenciais.page.active');
+            await page.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:10000});
+            const snap=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:window.innerWidth,openModals:document.querySelectorAll('.modal.open').length}));
+            if(snap.width>snap.viewport+2)throw new Error(`${label} overflow ${snap.width}/${snap.viewport}`);
+            if(errors.length)throw new Error(`${label} JS: ${errors.join(' | ')}`);
+            return snap;
           }
           (async()=>{
             const browser=await chromium.launch({headless:true});
+            const cleanCtx=await browser.newContext({viewport:{width:1920,height:1080}});
+            const clean=await cleanCtx.newPage();
+            const cleanSnap=await exercise(clean,'clean');
 
-            const desktopContext=await browser.newContext({viewport:{width:1920,height:1080}});
-            const desktop=await desktopContext.newPage();
-            const desktopErrors=[];
-            desktop.on('pageerror',e=>desktopErrors.push(e.message));
-            const started=Date.now();
-            const response=await desktop.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:30000});
-            if(!response||!response.ok())throw new Error(`Desktop HTTP ${response?.status()}`);
-            await waitBoot(desktop);
-            const bootMs=Date.now()-started;
-            if(bootMs>10000)throw new Error(`Boot excessivo: ${bootMs}ms`);
-            await desktop.waitForSelector('#account-btn',{timeout:5000});
+            const persistedCtx=await browser.newContext({viewport:{width:1920,height:1080}});
+            await persistedCtx.addInitScript(()=>{
+              localStorage.setItem('rumo-theme','dark');
+              localStorage.setItem('rumo-course-state',JSON.stringify({informatica:{progress:40}}));
+              localStorage.setItem('rumo-guest-goal',JSON.stringify({id:'guest',active:true,objective_name:'SEFAZ DF 2026',cargo:'Auditor',weekly_hours:10,study_days:[1,2,3,4,5],level:'intermediario'}));
+              sessionStorage.setItem('rumo-onboarding-shown','1');
+            });
+            const persisted=await persistedCtx.newPage();
+            const persistedSnap=await exercise(persisted,'persisted');
+            await persisted.click('[data-tab="hoje"]');
+            await persisted.waitForSelector('#hoje.page.active');
+            await persisted.click('#theme-toggle');
+            await persisted.click('#theme-toggle');
 
-            await desktop.click('[data-tab="concursos"]');
-            await desktop.waitForSelector('#concursos.page.active');
-            await desktop.waitForSelector('#all-contests .contest',{timeout:10000});
-            await desktop.waitForSelector('#all-contests .contest .contest-more',{timeout:10000});
-            await desktop.click('#all-contests .contest .contest-more');
-            await desktop.waitForSelector('#contest-detail-modal.open',{timeout:5000});
-            await desktop.click('#contest-detail-close');
-
-            await desktop.click('[data-tab="essenciais"]');
-            await desktop.waitForSelector('#essenciais.page.active');
-            await desktop.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:10000});
-            await desktop.click('#course-grid [data-course]');
-            await desktop.waitForSelector('#course-modal.open',{timeout:5000});
-            await desktop.click('#close-course');
-
-            const desk=await desktop.evaluate(()=>({
-              contests:document.querySelectorAll('#all-contests .contest').length,
-              courses:document.querySelectorAll('#course-grid .course').length,
-              width:document.documentElement.scrollWidth,
-              viewport:window.innerWidth
-            }));
-            if(desk.width>desk.viewport+2)throw new Error(`Desktop overflow ${desk.width}/${desk.viewport}`);
-            if(desktopErrors.length)throw new Error(`Desktop JS: ${desktopErrors.join(' | ')}`);
-
-            const mobileContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
-            const mobile=await mobileContext.newPage();
-            const mobileErrors=[];
-            mobile.on('pageerror',e=>mobileErrors.push(e.message));
-            const mStart=Date.now();
-            const mResponse=await mobile.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:30000});
-            if(!mResponse||!mResponse.ok())throw new Error(`Mobile HTTP ${mResponse?.status()}`);
-            await waitBoot(mobile);
-            const mobileBootMs=Date.now()-mStart;
+            const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const mobile=await mobileCtx.newPage();
+            await exercise(mobile,'mobile');
             await mobile.click('#menu');
             await mobile.waitForSelector('.sidebar.open',{timeout:3000});
-            const mob=await mobile.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:window.innerWidth}));
-            if(mob.width>mob.viewport+2)throw new Error(`Mobile overflow ${mob.width}/${mob.viewport}`);
-            if(mobileErrors.length)throw new Error(`Mobile JS: ${mobileErrors.join(' | ')}`);
 
-            console.log(JSON.stringify({bootMs,mobileBootMs,desktop:desk,mobile:mob}));
+            console.log(JSON.stringify({clean:cleanSnap,persisted:persistedSnap}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

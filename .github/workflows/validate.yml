@@ -1,0 +1,19 @@
+name: Validate RUMO
+on:
+  push:
+    branches: [master]
+  pull_request:
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check script.js
+          node --check app-v2.js
+          node --check radar-v3.js
+          for f in app/*.js; do echo "checking $f"; node --check "$f"; done

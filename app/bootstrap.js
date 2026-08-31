@@ -1,25 +1,25 @@
 (() => {
   'use strict';
   const loaded=new Map();
-  const addCss=href=>{if(document.querySelector(`link[href^="${href}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=3`;document.head.appendChild(l)};
-  const loadScript=src=>{if(loaded.has(src))return loaded.get(src);const p=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=`${src}?v=3`;s.async=true;s.onload=()=>resolve(s);s.onerror=reject;document.body.appendChild(s)});loaded.set(src,p);return p};
+  const addCss=href=>{if(document.querySelector(`link[href^="${href}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=4`;document.head.appendChild(l)};
+  const loadScript=src=>{if(loaded.has(src))return loaded.get(src);const p=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=`${src}?v=4`;s.async=true;s.onload=()=>resolve(s);s.onerror=reject;document.body.appendChild(s)});loaded.set(src,p);return p};
   addCss('./v2.css');addCss('./core-v1.css');addCss('./radar-v3.css');
 
   async function boot(){
     try{
       await window.RUMO_SDK_READY;
-      await loadScript('./app/core.js');
+      await loadScript('./app/core-v2.js');
       await Promise.all([
         loadScript('./app/account.js'),
-        loadScript('./app/engine.js'),
+        loadScript('./app/engine-v2.js'),
         loadScript('./app/schedule-guard.js'),
         loadScript('./app/session.js'),
         loadScript('./app/reviews.js'),
         loadScript('./app/assistant.js'),
         loadScript('./app/edital.js')
       ]);
-      await window.RUMO.sync();
-      document.documentElement.dataset.rumoVersion='3-fast';
+      await window.RUMO.sync(true);
+      document.documentElement.dataset.rumoVersion='4-fast';
       document.dispatchEvent(new CustomEvent('rumo:booted'));
     }catch(err){console.error('RUMO boot failed',err);document.documentElement.dataset.rumoBoot='error'}
   }

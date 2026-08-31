@@ -1,0 +1,177 @@
+/* RUMO UI v3 — legibilidade, foco visual e responsividade */
+
+/* Tipografia: piso mais confortável em desktop 1920x1080 */
+body{font-size:16px}
+.eyebrow{font-size:12px}
+.objective-strip small,.card small{font-size:11px}
+.objective-strip b{font-size:16px}
+.card h2{font-size:24px}
+.metric{font-size:13px}
+.metric b{font-size:14px}
+.note,.muted{font-size:12px}
+.nav{font-size:15px}
+.brand-copy span{font-size:12px}
+.study b{font-size:14px}
+.study span{font-size:12px}
+.study .time{font-size:11px}
+.contest h3{font-size:16px}
+.contest p{font-size:12px}
+.meta span,.status{font-size:10px}
+.salary{font-size:12px}
+.course p{font-size:13px}
+.course-info span{font-size:11px}
+.review p{font-size:13px}
+.review-status{font-size:11px}
+
+/* Mais presença em monitores grandes, sem esticar demais a leitura */
+.page{max-width:1500px;padding:40px 46px 76px}
+.hero{margin-bottom:24px}
+.objective-strip{margin-bottom:16px;padding:18px 22px;gap:18px}
+.dashboard-grid{gap:16px}
+
+/* Os dois gráficos passam a conversar como uma unidade visual */
+.analytics-shell{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:minmax(0,1.75fr) minmax(300px,.72fr);
+  gap:0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:26px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.analytics-shell>.activity-card,
+.analytics-shell>.performance-card{
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  margin:0;
+}
+.analytics-shell>.activity-card{padding:26px 28px 24px}
+.analytics-shell>.performance-card{
+  padding:26px 28px;
+  border-left:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+}
+
+/* Barras mais próximas e focadas, como a referência */
+.activity-chart{
+  height:210px;
+  width:100%;
+  max-width:650px;
+  margin:8px auto 0;
+  padding:18px 10px 0;
+  display:grid;
+  grid-template-columns:repeat(7,46px);
+  justify-content:center;
+  gap:20px;
+  border-bottom:1px solid var(--line);
+}
+.bar-day{gap:10px}
+.bar-day i{
+  width:34px;
+  min-height:20px;
+  border-radius:10px 10px 4px 4px;
+  box-shadow:inset 0 -18px 0 color-mix(in srgb,#17b5ff 22%,transparent);
+}
+.bar-day span{font-size:12px;height:20px}
+.mini-stats{max-width:760px;margin:14px auto 0;gap:10px}
+.mini-stats div{padding:13px 14px}
+.mini-stats b{font-size:20px}
+.mini-stats span{font-size:11px}
+
+/* Desempenho circular com mais leitura e menos sensação de isolamento */
+.performance-card h2{font-size:21px;margin-bottom:4px}
+.donut{
+  width:170px;
+  height:170px;
+  margin:18px auto 20px;
+  background:conic-gradient(#755cff 0 56%,#ff7cc3 56% 76%,#ffce69 76% 84%,var(--surface-3) 84%);
+}
+.donut:after{inset:23px}
+.donut b{font-size:32px}
+.donut span{font-size:11px}
+.performance-card .metric{margin-top:0}
+
+/* Cards seguintes permanecem grandes, mas com hierarquia melhor */
+.focus-card,.week-card{margin-top:0}
+.card{padding:24px}
+.progress{width:64px;height:64px;font-size:13px}
+.study{min-height:68px;padding:14px 15px}
+.hours{font-size:36px}
+.comeback{font-size:12px}
+
+/* Evita botão de personalização ficar largo/solto no bloco de objetivo */
+.personalize-btn{width:auto!important;min-width:180px!important;justify-self:end!important;padding:11px 16px!important;font-size:12px!important}
+.objective-strip.personalized .personalize-btn{grid-column:auto!important}
+
+/* Desktop intermediário / notebook */
+@media(max-width:1250px){
+  .page{padding:34px 30px 64px}
+  .analytics-shell{grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr)}
+  .activity-chart{grid-template-columns:repeat(7,40px);gap:15px;max-width:560px}
+  .bar-day i{width:31px}
+}
+
+/* Tablet: gráficos empilham, mas continuam pertencendo ao mesmo bloco */
+@media(max-width:1000px){
+  body{font-size:15px}
+  .analytics-shell{grid-template-columns:1fr}
+  .analytics-shell>.performance-card{border-left:0;border-top:1px solid var(--line)}
+  .performance-card{
+    display:grid!important;
+    grid-template-columns:1fr 190px;
+    grid-template-rows:auto auto auto;
+    column-gap:24px;
+    align-items:center;
+  }
+  .performance-card>small,.performance-card>h2{grid-column:1}
+  .performance-card .donut{grid-column:2;grid-row:1/4;margin:0 auto}
+  .performance-card .metric{grid-column:1}
+  .activity-chart{max-width:620px}
+  .objective-strip{grid-template-columns:1fr 1fr}
+  .personalize-btn{justify-self:start!important}
+}
+
+/* Celular: uma coluna, fonte confortável, barras sem transbordar */
+@media(max-width:780px){
+  body{font-size:15px}
+  .page{padding:26px 14px 48px}
+  .hero h1{font-size:34px}
+  .eyebrow{font-size:10.5px}
+  .objective-strip small,.card small{font-size:10.5px}
+  .objective-strip b{font-size:14px}
+  .card h2{font-size:21px}
+  .analytics-shell{border-radius:22px}
+  .analytics-shell>.activity-card,.analytics-shell>.performance-card{padding:20px 16px}
+  .activity-chart{
+    height:170px;
+    max-width:none;
+    padding-inline:0;
+    grid-template-columns:repeat(7,minmax(24px,1fr));
+    gap:4px;
+  }
+  .bar-day i{width:min(28px,70%)}
+  .bar-day span{font-size:10px}
+  .mini-stats{grid-template-columns:repeat(3,1fr);gap:6px}
+  .mini-stats div{padding:10px 8px}
+  .mini-stats b{font-size:16px}
+  .mini-stats span{font-size:9.5px}
+  .performance-card{display:block!important}
+  .performance-card .donut{width:150px;height:150px;margin:18px auto}
+  .metric{font-size:12px}
+  .personalize-btn{width:100%!important;justify-self:stretch!important}
+}
+
+@media(max-width:480px){
+  .hero h1{font-size:31px}
+  .objective-strip{grid-template-columns:1fr}
+  .mini-stats{grid-template-columns:1fr 1fr 1fr}
+  .activity-chart{height:155px}
+  .bar-day i{width:min(25px,72%)}
+  .study b{font-size:13px}
+  .study span{font-size:11px}
+}

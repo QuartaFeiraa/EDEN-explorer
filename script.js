@@ -1,0 +1,19 @@
+const SUPABASE_URL='https://zycpeiyztqysjqejtour.supabase.co';
+const SUPABASE_KEY='sb_publishable_heHXvAxo36EvgHg_8_XOXQ_rRxE5t5H';
+const fallback=[
+{id:1,nome:'SEFAZ DF 2026',orgao:'Secretaria de Economia do DF',area:'Fiscal',status:'banca_definida',banca:'Cebraspe',vagas:'265',remuneracao:'R$ 19 mil a R$ 26 mil',uf:'DF'},
+{id:2,nome:'PC RJ Delegado 2026',orgao:'Polícia Civil do Rio de Janeiro',area:'Segurança',status:'edital_iminente',banca:'Cesgranrio',vagas:'85',remuneracao:'Até R$ 26 mil',uf:'RJ'},
+{id:3,nome:'TRT 8 2026',orgao:'Tribunal Regional do Trabalho da 8ª Região',area:'Tribunais',status:'banca_definida',banca:'FCC',vagas:'A definir',remuneracao:'R$ 9 mil a R$ 16 mil',uf:'PA/AP'}
+];
+const study=[['Direito Administrativo','Atos administrativos',40],['Português','Interpretação de texto',35],['Informática','Redes e TCP/IP',30],['Revisão inteligente','12 erros recentes',30]];
+let contests=[...fallback], done=new Set();
+function statusLabel(s){return ({edital_iminente:'Edital iminente',banca_definida:'Banca definida',previsto:'Previsto'})[s]||'Previsto'}
+function contestHTML(c){return `<article class="contest"><div class="contest-top"><span class="status ${c.status||''}">${statusLabel(c.status)}</span><span class="meta-state">${c.uf||'BR'}</span></div><h3>${c.nome}</h3><p>${c.orgao}</p><div class="meta"><span>${c.banca||'Banca a definir'}</span><span>${c.vagas||'Vagas a definir'} vagas</span></div><b class="salary">${c.remuneracao||'Remuneração a definir'}</b></article>`}
+function renderContests(list=contests){document.querySelector('#featured').innerHTML=list.slice(0,4).map(contestHTML).join('');document.querySelector('#all-contests').innerHTML=list.map(contestHTML).join('')}
+function renderStudy(){const box=document.querySelector('#study-list');box.innerHTML=study.map((s,i)=>`<button class="study ${done.has(i)?'done':''}" data-study="${i}"><div class="num">${done.has(i)?'✓':i+1}</div><div><b>${s[0]}</b><span>${s[1]}</span></div><div class="time">${s[2]} min</div></button>`).join('');document.querySelector('.progress').textContent=Math.round(done.size/study.length*100)+'%';document.querySelectorAll('[data-study]').forEach(b=>b.onclick=()=>{const i=+b.dataset.study;done.has(i)?done.delete(i):done.add(i);renderStudy()})}
+function switchTab(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.tab===id));document.querySelector('.sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchTab(b.dataset.go));document.querySelector('#menu').onclick=()=>document.querySelector('.sidebar').classList.toggle('open');
+const modal=document.querySelector('#modal');document.querySelector('#open-ai').onclick=()=>modal.classList.add('open');document.querySelector('#close-ai').onclick=()=>modal.classList.remove('open');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('open')};
+document.querySelector('#search').addEventListener('input',e=>{const q=e.target.value.toLowerCase();const f=contests.filter(c=>`${c.nome} ${c.orgao} ${c.area||''} ${c.uf||''}`.toLowerCase().includes(q));document.querySelector('#all-contests').innerHTML=f.map(contestHTML).join('')});
+renderStudy();renderContests();
+fetch(`${SUPABASE_URL}/rest/v1/concursos?select=*&order=destaque.desc,atualizado_em.desc&limit=50`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(Array.isArray(d)&&d.length){contests=d;renderContests()}}).catch(()=>{});

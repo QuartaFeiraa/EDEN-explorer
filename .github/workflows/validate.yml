@@ -60,9 +60,9 @@ jobs:
         run: |
           node <<'NODE'
           const { chromium } = require('playwright');
-          const URL='http://127.0.0.1:4173/';
+          const APP_URL='http://127.0.0.1:4173/';
           async function waitBoot(page){
-            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='4-fast',{timeout:20000});
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='4-fast',null,{timeout:20000});
             const state=await page.evaluate(()=>({version:document.documentElement.dataset.rumoVersion,bootError:document.documentElement.dataset.rumoBoot||''}));
             if(state.bootError==='error')throw new Error('RUMO boot marcou erro');
             return state;
@@ -75,7 +75,7 @@ jobs:
             const desktopErrors=[];
             desktop.on('pageerror',e=>desktopErrors.push(e.message));
             const started=Date.now();
-            const response=await desktop.goto(URL,{waitUntil:'domcontentloaded',timeout:30000});
+            const response=await desktop.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:30000});
             if(!response||!response.ok())throw new Error(`Desktop HTTP ${response?.status()}`);
             await waitBoot(desktop);
             const bootMs=Date.now()-started;
@@ -92,7 +92,7 @@ jobs:
 
             await desktop.click('[data-tab="essenciais"]');
             await desktop.waitForSelector('#essenciais.page.active');
-            await desktop.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,{timeout:10000});
+            await desktop.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:10000});
             await desktop.click('#course-grid [data-course]');
             await desktop.waitForSelector('#course-modal.open',{timeout:5000});
             await desktop.click('#close-course');
@@ -111,7 +111,7 @@ jobs:
             const mobileErrors=[];
             mobile.on('pageerror',e=>mobileErrors.push(e.message));
             const mStart=Date.now();
-            const mResponse=await mobile.goto(URL,{waitUntil:'domcontentloaded',timeout:30000});
+            const mResponse=await mobile.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:30000});
             if(!mResponse||!mResponse.ok())throw new Error(`Mobile HTTP ${mResponse?.status()}`);
             await waitBoot(mobile);
             const mobileBootMs=Date.now()-mStart;

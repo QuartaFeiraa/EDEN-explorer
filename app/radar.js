@@ -10,7 +10,25 @@
   function note(c){if(c.status==='inscricoes_abertas')return'As inscrições estão abertas. Confira prazo, taxa e requisitos no edital oficial.';if(c.status==='edital_publicado')return'O edital já foi publicado. Use o conteúdo programático e o cronograma oficiais como referência principal.';if(c.status==='prova_marcada')return'A prova já tem data. Priorize matérias de maior peso, questões da banca e revisões.';if(c.status==='banca_definida')return'Com a banca definida, já é possível estudar o estilo de cobrança da organizadora.';if(c.status==='edital_iminente')return'O edital está próximo. Prepare a base reaproveitável e acompanhe a publicação oficial.';return'A oportunidade ainda é previsão. Planeje com cautela e espere confirmação oficial antes de decisões de inscrição.'}
   function cell(label,value,wide=false){return value?`<div${wide?' class="wide"':''}><span>${esc(label)}</span><b>${esc(value)}</b></div>`:''}
   function open(c){inject();const m=document.querySelector('#contest-detail-modal'),box=document.querySelector('#contest-detail-content'),source=c.fonte_oficial_url||c.fonte_url;box.innerHTML=`<div class="contest-detail-top"><div><span class="status ${esc(c.status||'')}">${esc(statusText[c.status]||'Em acompanhamento')}</span><h2>${esc(c.nome)}</h2><p class="contest-detail-org">${esc(c.orgao||'')}</p></div><div class="contest-detail-state">${esc(c.uf||'BR')}</div></div><p class="contest-detail-summary">${esc(summary(c))}</p><div class="contest-detail-grid">${cell('Situação',c.edital_previsto||statusText[c.status])}${cell('Banca',c.banca||'A definir')}${cell('Vagas',c.vagas||'A definir')}${cell('Escolaridade',c.escolaridade||'A definir')}${cell('Remuneração',c.remuneracao||'A definir',true)}${cell('Área',c.area||'Diversas')}${cell('Cargos',c.cargos,true)}${cell('Requisitos',c.requisitos,true)}${c.inscricoes_fim?cell('Fim das inscrições',fmtDate(c.inscricoes_fim)):''}${c.prova_data?cell('Prova',fmtDate(c.prova_data)):''}</div><div class="contest-detail-note"><b>O que observar agora</b><p>${esc(note(c))}</p></div><div class="contest-detail-footer"><span>${esc(updated(c.atualizado_em))}</span>${source?'<button type="button" id="contest-source-btn">Abrir fonte ↗</button>':''}</div><p class="contest-detail-disclaimer">Confirme datas, vagas, requisitos e remuneração no edital e nos canais oficiais.</p>`;const b=document.querySelector('#contest-source-btn');if(b)b.onclick=()=>window.open(source,'_blank','noopener,noreferrer');m.classList.add('open')}
-  function decorate(){document.querySelectorAll('.contest').forEach(card=>{const title=card.querySelector('h3')?.textContent?.trim(),c=rows.find(x=>String(x.nome).trim()===title);if(!c)return;const badge=card.querySelector('.status');if(badge){badge.className=`status ${c.status||''}`;badge.textContent=statusText[c.status]||'Em acompanhamento'}if(card.dataset.radarFast)return;card.dataset.radarFast='1';const org=card.querySelector('p');if(org){org.classList.add('contest-org');org.insertAdjacentHTML('afterend',`<p class="contest-summary">${esc(summary(c))}</p>`)}const footer=document.createElement('div');footer.className='contest-actions';footer.innerHTML=`<button type="button" class="contest-more">Ver detalhes</button><span>${esc(updated(c.atualizado_em))}</span>`;card.appendChild(footer);footer.querySelector('button').onclick=e=>{e.stopPropagation();open(c)};card.onclick=e=>{if(!e.target.closest('button,a'))open(c)}})}
-  async function boot(){rows=await Promise.resolve(window.RUMO_CONTESTS_READY||window.RUMO_CONTESTS||[]);if(!Array.isArray(rows))rows=window.RUMO_CONTESTS||[];inject();decorate();new MutationObserver(decorate).observe(document.querySelector('main')||document.body,{childList:true,subtree:true})}
+  function decorate(){
+    document.querySelectorAll('.contest').forEach(card=>{
+      const title=card.querySelector('h3')?.textContent?.trim(),c=rows.find(x=>String(x.nome).trim()===title);
+      if(!c||card.dataset.radarFast==='1')return;
+      // Mark first. All mutations below can wake the observer once, but the
+      // second pass sees the marker and performs zero DOM writes.
+      card.dataset.radarFast='1';
+      const badge=card.querySelector('.status'),label=statusText[c.status]||'Em acompanhamento',klass=`status ${c.status||''}`;
+      if(badge){if(badge.className!==klass)badge.className=klass;if(badge.textContent!==label)badge.textContent=label}
+      const org=card.querySelector('p');
+      if(org){org.classList.add('contest-org');org.insertAdjacentHTML('afterend',`<p class="contest-summary">${esc(summary(c))}</p>`)}
+      const footer=document.createElement('div');
+      footer.className='contest-actions';
+      footer.innerHTML=`<button type="button" class="contest-more">Ver detalhes</button><span>${esc(updated(c.atualizado_em))}</span>`;
+      card.appendChild(footer);
+      footer.querySelector('button').onclick=e=>{e.stopPropagation();open(c)};
+      card.onclick=e=>{if(!e.target.closest('button,a'))open(c)};
+    });
+  }
+  async function boot(){rows=await Promise.resolve(window.RUMO_CONTESTS_READY||window.RUMO_CONTESTS||[]);if(!Array.isArray(rows))rows=window.RUMO_CONTESTS||[];inject();decorate();const root=document.querySelector('main')||document.body;new MutationObserver(decorate).observe(root,{childList:true,subtree:true})}
   boot();window.RUMO_RADAR={open,decorate};
 })();

@@ -39,7 +39,7 @@ jobs:
   browser-smoke:
     needs: syntax
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,12 +61,15 @@ jobs:
           exit 1
       - name: Test clean persisted degraded and mobile states
         run: |
-          node <<'NODE'
+          timeout 90s node <<'NODE'
           const { chromium } = require('playwright');
           const APP_URL='http://127.0.0.1:4173/';
+          const log=m=>console.log(`[smoke ${new Date().toISOString()}] ${m}`);
           async function waitBoot(page,label){
+            log(`${label}: waiting boot`);
             await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='7-live',null,{timeout:12000});
             const state=await page.evaluate(()=>({boot:document.documentElement.dataset.rumoBoot||'',font:getComputedStyle(document.body).fontFamily}));
+            log(`${label}: boot ready (${state.font})`);
             if(state.boot==='error')throw new Error(`${label}: boot marcou erro`);
             if(!/Inter/i.test(state.font))throw new Error(`${label}: fonte inesperada ${state.font}`);
           }
@@ -74,32 +77,43 @@ jobs:
             const errors=[];
             page.on('pageerror',e=>errors.push(e.message));
             const started=Date.now();
+            log(`${label}: goto`);
             const response=await page.goto(APP_URL,{waitUntil:'domcontentloaded',timeout:20000});
             if(!response||!response.ok())throw new Error(`${label}: HTTP ${response?.status()}`);
             await waitBoot(page,label);
             const bootMs=Date.now()-started;
+            log(`${label}: account`);
             await page.waitForSelector('#account-btn',{timeout:5000});
+            log(`${label}: concursos`);
             await page.click('[data-tab="concursos"]',{timeout:5000});
             await page.waitForSelector('#concursos.page.active',{timeout:3000});
+            log(`${label}: revisoes`);
             await page.click('[data-tab="revisoes"]',{timeout:5000});
             await page.waitForSelector('#revisoes.page.active',{timeout:3000});
             if(courses){
+              log(`${label}: essenciais`);
               await page.click('[data-tab="essenciais"]',{timeout:5000});
               await page.waitForSelector('#essenciais.page.active',{timeout:3000});
+              log(`${label}: course module`);
               await page.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:10000});
             }
             const snap=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:window.innerWidth,openModals:document.querySelectorAll('.modal.open').length}));
             if(snap.width>snap.viewport+2)throw new Error(`${label}: overflow ${snap.width}/${snap.viewport}`);
             if(errors.length)throw new Error(`${label}: JS ${errors.join(' | ')}`);
+            log(`${label}: done ${bootMs}ms`);
             return {bootMs,...snap};
           }
           (async()=>{
+            log('launch chromium');
             const browser=await chromium.launch({headless:true});
 
+            log('CLEAN start');
             const cleanCtx=await browser.newContext({viewport:{width:1920,height:1080}});
             const clean=await cleanCtx.newPage();
             const cleanSnap=await exercise(clean,'clean');
+            await cleanCtx.close();
 
+            log('PERSISTED start');
             const persistedCtx=await browser.newContext({viewport:{width:1920,height:1080}});
             await persistedCtx.addInitScript(()=>{
               localStorage.setItem('rumo-theme','dark');
@@ -109,24 +123,33 @@ jobs:
             });
             const persisted=await persistedCtx.newPage();
             const persistedSnap=await exercise(persisted,'persisted');
+            log('persisted: hoje/theme');
             await persisted.click('[data-tab="hoje"]',{timeout:5000});
             await persisted.waitForSelector('#hoje.page.active',{timeout:3000});
             await persisted.click('#theme-toggle',{timeout:3000});
             await persisted.click('#theme-toggle',{timeout:3000});
+            await persistedCtx.close();
 
+            log('DEGRADED start');
             const degradedCtx=await browser.newContext({viewport:{width:1920,height:1080}});
             await degradedCtx.route('https://zycpeiyztqysjqejtour.supabase.co/**',route=>route.abort());
             const degraded=await degradedCtx.newPage();
             const degradedSnap=await exercise(degraded,'degraded',{courses:false});
+            log('degraded: hoje');
             await degraded.click('[data-tab="hoje"]',{timeout:5000});
             await degraded.waitForSelector('#hoje.page.active',{timeout:3000});
+            await degradedCtx.close();
 
+            log('MOBILE start');
             const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
             const mobile=await mobileCtx.newPage();
             const mobileSnap=await exercise(mobile,'mobile',{courses:false});
+            log('mobile: menu');
             await mobile.click('#menu',{timeout:3000});
             await mobile.waitForSelector('.sidebar.open',{timeout:3000});
+            await mobileCtx.close();
 
+            log('all scenarios passed');
             console.log(JSON.stringify({clean:cleanSnap,persisted:persistedSnap,degraded:degradedSnap,mobile:mobileSnap}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});

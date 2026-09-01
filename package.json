@@ -1,0 +1,12 @@
+{
+  "name": "eden-rumo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "mercadopago": "3.6.0"
+  }
+}

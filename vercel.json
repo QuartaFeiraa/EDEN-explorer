@@ -1,40 +1,15 @@
 {
   "name": "eden-rumo",
   "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {"key":"X-Content-Type-Options","value":"nosniff"},
-        {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},
-        {"key":"X-Frame-Options","value":"DENY"},
-        {"key":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=()"}
-      ]
-    },
-    {
-      "source": "/",
-      "headers": [{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]
-    },
-    {
-      "source": "/index.html",
-      "headers": [{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]
-    },
-    {
-      "source": "/script.js",
-      "headers": [{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]
-    },
-    {
-      "source": "/service-worker.js",
-      "headers": [{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]
-    },
-    {
-      "source": "/app/(.*)\\.js",
-      "headers": [{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]
-    }
+    {"source":"/(.*)","headers":[{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},{"key":"X-Frame-Options","value":"DENY"},{"key":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=()"}]},
+    {"source":"/","headers":[{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]},
+    {"source":"/index.html","headers":[{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]},
+    {"source":"/script.js","headers":[{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]},
+    {"source":"/service-worker.js","headers":[{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]},
+    {"source":"/app/(.*)\\.js","headers":[{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]}
   ],
   "crons": [
-    {
-      "path": "/api/radar-refresh",
-      "schedule": "15 9 * * *"
-    }
+    {"path":"/api/radar-refresh","schedule":"15 9 * * *"},
+    {"path":"/api/send-reminders","schedule":"0 12 * * *"}
   ]
 }

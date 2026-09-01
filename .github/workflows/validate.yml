@@ -15,17 +15,22 @@ jobs:
         run: |
           node --check script.js
           for f in app/*.js; do echo "checking $f"; node --check "$f"; done
-      - name: Check stable architecture
+          for f in api/*.js; do echo "checking $f"; node --check "$f"; done
+          node --check service-worker.js
+      - name: Check production architecture
         run: |
-          grep -q "RELEASE='9-stable'" app/bootstrap.js
+          grep -q "RELEASE='10-prod'" app/bootstrap.js
           grep -q "radar-v2.js" app/bootstrap.js
           grep -q "courses-v2.js" app/bootstrap.js
           grep -q "history-v1.js" app/bootstrap.js
           grep -q "product-v1.js" app/bootstrap.js
-          grep -q "product-v1.css" app/bootstrap.js
-          grep -q "styles.css?v=9-stable" index.html
-          grep -q "script.js?v=9-stable" index.html
-          grep -q "bootstrap.js?v=9-stable" index.html
+          grep -q "integrations-v1.js" app/bootstrap.js
+          grep -q "integrations-v1.css" app/bootstrap.js
+          grep -q "AI_GATEWAY_API_KEY" api/assistant.js
+          grep -q "VERCEL_OIDC_TOKEN" api/assistant.js
+          grep -q "ai_usage" api/assistant.js
+          grep -q "calendar.google.com" app/integrations-v1.js
+          grep -q "serviceWorker.register" app/integrations-v1.js
           ! grep -q "app/radar.js" app/bootstrap.js
           ! grep -q "app/courses.js" app/bootstrap.js
           ! grep -q "MutationObserver" app/radar-v2.js
@@ -33,7 +38,7 @@ jobs:
           grep -q "contest_watchlist" app/radar-v2.js
           grep -q "done_lessons" app/courses-v2.js
           grep -q "sessoes_estudo" app/history-v1.js
-          echo "RUMO v9 stable architecture OK"
+          echo "RUMO v10 production architecture OK"
   browser-smoke:
     needs: syntax
     runs-on: ubuntu-latest
@@ -57,14 +62,14 @@ jobs:
           done
           cat /tmp/rumo-server.log
           exit 1
-      - name: Test stable product in Chromium
+      - name: Test product and integrations in Chromium
         run: |
-          timeout 100s node <<'NODE'
+          timeout 110s node <<'NODE'
           const { chromium } = require('playwright');
           const APP='http://127.0.0.1:4173/';
           const log=m=>console.log('[smoke]',m);
           async function waitReady(page,label){
-            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='9-stable',null,{timeout:15000});
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='10-prod',null,{timeout:15000});
             const state=await page.evaluate(()=>({boot:document.documentElement.dataset.rumoBoot,font:getComputedStyle(document.body).fontFamily,w:document.documentElement.scrollWidth,v:innerWidth}));
             if(state.boot!=='ready')throw new Error(`${label}: boot ${state.boot}`);
             if(!/Inter/i.test(state.font))throw new Error(`${label}: fonte ${state.font}`);
@@ -74,6 +79,10 @@ jobs:
             const errors=[];page.on('pageerror',e=>errors.push(e.message));
             const t=Date.now();await page.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(page,label);
             await page.waitForTimeout(3500);
+            await page.waitForFunction(()=>window.RUMO_INTEGRATIONS&&window.RUMO_ASSISTANT,null,{timeout:8000});
+            await page.evaluate(()=>window.RUMO_INTEGRATIONS.open());
+            await page.waitForSelector('#integrations-v1.open',{timeout:3000});
+            await page.click('#integrations-close-v1');
             await page.click('[data-tab="concursos"]',{timeout:3000});
             await page.waitForSelector('#concursos.page.active');
             await page.waitForFunction(()=>document.querySelectorAll('#all-contests .contest').length>=3,null,{timeout:8000});
@@ -89,6 +98,8 @@ jobs:
             await page.click('[data-tab="hoje"]',{timeout:3000});
             await page.click('#theme-toggle',{timeout:3000});await page.click('#theme-toggle',{timeout:3000});
             await page.waitForSelector('#history-open-v1',{timeout:5000});await page.click('#history-open-v1');await page.waitForSelector('#history-v1.open');await page.click('#history-close-v1');
+            const sw=await page.evaluate(async()=>('serviceWorker'in navigator)?!!(await navigator.serviceWorker.ready.catch(()=>null)):true);
+            if(!sw)throw new Error(`${label}: service worker not ready`);
             if(errors.length)throw new Error(`${label}: JS ${errors.join(' | ')}`);
             return Date.now()-t;
           }

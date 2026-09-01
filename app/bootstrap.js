@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const RELEASE='9-stable';
+  const RELEASE='10-prod';
   const loaded=new Map();
   const addCss=href=>{if(document.querySelector(`link[href^="${href}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${RELEASE}`;document.head.appendChild(l)};
   const loadScript=src=>{if(loaded.has(src))return loaded.get(src);const p=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=`${src}?v=${RELEASE}`;s.async=true;s.onload=()=>resolve(s);s.onerror=()=>reject(new Error(`Falha ao carregar ${src}`));document.body.appendChild(s)});loaded.set(src,p);return p};
@@ -9,6 +9,7 @@
   addCss('./core-v1.css');
   addCss('./radar-v3.css');
   addCss('./product-v1.css');
+  addCss('./integrations-v1.css');
 
   async function boot(){
     try{
@@ -34,7 +35,8 @@
         loadScript('./app/edital.js'),
         loadScript('./app/account-extras-v2.js'),
         loadScript('./app/history-v1.js'),
-        loadScript('./app/product-v1.js')
+        loadScript('./app/product-v1.js'),
+        loadScript('./app/integrations-v1.js')
       ]).then(results=>{
         const failed=results.filter(x=>x.status==='rejected');
         if(failed.length)console.warn('RUMO optional modules degraded',failed.map(x=>x.reason));

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const RELEASE='11-prod';
+  const RELEASE='12-content';
   const loaded=new Map();
   const addCss=href=>{if(document.querySelector(`link[href^="${href}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${RELEASE}`;document.head.appendChild(l)};
   const loadScript=src=>{if(loaded.has(src))return loaded.get(src);const p=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=`${src}?v=${RELEASE}`;s.async=true;s.onload=()=>resolve(s);s.onerror=()=>reject(new Error(`Falha ao carregar ${src}`));document.body.appendChild(s)});loaded.set(src,p);return p};
@@ -10,6 +10,7 @@
   addCss('./radar-v3.css');
   addCss('./product-v1.css');
   addCss('./integrations-v1.css');
+  addCss('./content-v1.css');
 
   async function boot(){
     try{
@@ -61,10 +62,10 @@
     .catch(()=>[])
     .finally(()=>loadScript('./app/radar-v2.js').catch(err=>console.warn('Radar indisponível',err)));
 
-  let coursesReady=null;
-  const loadCourses=()=>coursesReady||(coursesReady=loadScript('./app/courses-v2.js'));
-  document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='essenciais')loadCourses().catch(()=>{})});
-  document.addEventListener('click',e=>{const card=e.target.closest?.('#course-grid [data-course]');if(card&&!window.RUMO_COURSES){e.preventDefault();e.stopImmediatePropagation();loadCourses().then(()=>window.RUMO_COURSES?.open(card.dataset.course)).catch(()=>{})}},true);
+  let contentReady=null;
+  const loadContent=()=>contentReady||(contentReady=loadScript('./app/content-v1.js'));
+  document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='essenciais')loadContent().catch(()=>{})});
+  document.addEventListener('click',e=>{const card=e.target.closest?.('#course-grid [data-course]');if(card&&!window.RUMO_CONTENT){e.preventDefault();e.stopImmediatePropagation();loadContent().then(()=>window.RUMO_CONTENT?.open(card.dataset.course)).catch(()=>{})}},true);
 
   boot();
 })();

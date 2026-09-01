@@ -1,48 +1,96 @@
 name: Validate RUMO
+
 on:
   push:
-    branches: [master]
+    branches: [staging]
   pull_request:
+    branches: [master]
+  workflow_dispatch:
+
 jobs:
-  syntax:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Install production dependencies
+        run: npm install --ignore-scripts --no-fund
+
       - name: Check JavaScript syntax
         run: |
           node --check script.js
+          node --check service-worker.js
           for f in app/*.js; do echo "checking $f"; node --check "$f"; done
           for f in api/*.js; do echo "checking $f"; node --check "$f"; done
-          node --check service-worker.js
-      - name: Check production architecture
+
+      - name: Verify production architecture
         run: |
-          grep -q "RELEASE='10-prod'" app/bootstrap.js
-          grep -q "radar-v2.js" app/bootstrap.js
-          grep -q "courses-v2.js" app/bootstrap.js
-          grep -q "history-v1.js" app/bootstrap.js
-          grep -q "product-v1.js" app/bootstrap.js
-          grep -q "integrations-v1.js" app/bootstrap.js
-          grep -q "integrations-v1.css" app/bootstrap.js
-          grep -q "AI_GATEWAY_API_KEY" api/assistant.js
-          grep -q "VERCEL_OIDC_TOKEN" api/assistant.js
-          grep -q "ai_usage" api/assistant.js
-          grep -q "calendar.google.com" app/integrations-v1.js
-          grep -q "serviceWorker.register" app/integrations-v1.js
-          ! grep -q "app/radar.js" app/bootstrap.js
-          ! grep -q "app/courses.js" app/bootstrap.js
+          grep -q "RELEASE='11-prod'" app/bootstrap.js
+          for f in analytics-v1.js account-privacy-v1.js billing-v2.js push-v1.js integrations-v1.js history-v1.js product-v1.js radar-v2.js; do grep -q "app/$f" app/bootstrap.js; done
+          grep -q "MERCADO_PAGO_ACCESS_TOKEN" api/checkout.js
+          grep -q "WebhookSignatureValidator" api/mercadopago-webhook.js
+          grep -q "CRON_SECRET" api/radar-refresh.js
+          grep -q "VAPID_PUBLIC_KEY" api/push-config.js
+          grep -q "webpush.sendNotification" api/send-reminders.js
+          grep -q "addEventListener('push'" service-worker.js
+          grep -q "export-account" app/account-privacy-v1.js
+          grep -q "delete-account" app/account-privacy-v1.js
+          grep -q "user_consents" app/account-privacy-v1.js
+          grep -q "product_events" app/analytics-v1.js
+          grep -q "tesseract.js" app/edital.js
+          grep -q '"mercadopago": "3.6.0"' package.json
+          grep -q '"web-push": "3.6.7"' package.json
+          grep -q '"/api/radar-refresh"' vercel.json
+          grep -q '"/api/send-reminders"' vercel.json
+          grep -q "Versão 2026-09-01" privacidade.html
+          grep -q "Versão 2026-09-01" termos.html
           ! grep -q "MutationObserver" app/radar-v2.js
           ! grep -q "MutationObserver" app/courses-v2.js
-          grep -q "contest_watchlist" app/radar-v2.js
-          grep -q "done_lessons" app/courses-v2.js
-          grep -q "sessoes_estudo" app/history-v1.js
-          echo "RUMO v10 production architecture OK"
+          ! grep -q "Continuar no beta grátis" app/account-extras-v2.js
+          test ! -e app-v2.js
+          test ! -e planner-v1.js
+          test ! -e study-tools.js
+          test ! -e study-tools.css
+          test ! -e radar-v3.js
+          test ! -e orbe-preview.html
+          test ! -e app/core.js
+          test ! -e app/engine.js
+          test ! -e app/courses.js
+          test ! -e app/billing.js
+          test ! -e app/radar.js
+          test ! -e app/sync.js
+          ! grep -R --exclude-dir=node_modules -E "sb_secret_|APP_USR-[0-9]+-|MERCADO_PAGO_ACCESS_TOKEN=['\"]|SUPABASE_SERVICE_ROLE_KEY=['\"]|VAPID_PRIVATE_KEY=['\"]" .
+          echo "RUMO v11 architecture and secret scan OK"
+
+      - name: Verify server fail-safe contracts
+        run: |
+          node <<'NODE'
+          const assert=require('assert');
+          function response(){return {code:200,headers:{},body:'',status(n){this.code=n;return this},setHeader(k,v){this.headers[k]=v;return this},end(v=''){this.body=String(v);return this},json(v){this.body=JSON.stringify(v);return this}}}
+          async function call(file,req){const res=response();await require('./'+file)(req,res);return res}
+          (async()=>{
+            let r=await call('api/assistant.js',{method:'POST',headers:{}});assert.equal(r.code,401);
+            r=await call('api/checkout.js',{method:'POST',headers:{},body:{}});assert.equal(r.code,401);
+            r=await call('api/cancel-subscription.js',{method:'POST',headers:{},body:{}});assert.equal(r.code,401);
+            r=await call('api/push-config.js',{method:'GET',headers:{}});assert.equal(r.code,200);
+            r=await call('api/radar-refresh.js',{method:'GET',headers:{}});assert.equal(r.code,401);
+            r=await call('api/send-reminders.js',{method:'GET',headers:{}});assert.equal(r.code,401);
+            r=await call('api/mercadopago-webhook.js',{method:'POST',headers:{},query:{},body:{}});assert.equal(r.code,503);
+            console.log('Server fail-safe contracts OK');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
   browser-smoke:
-    needs: syntax
+    needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,7 +98,6 @@ jobs:
           node-version: '22'
       - name: Install browser runner
         run: |
-          npm init -y >/dev/null 2>&1
           npm install --no-save playwright >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
       - name: Start exact commit locally
@@ -62,58 +109,39 @@ jobs:
           done
           cat /tmp/rumo-server.log
           exit 1
-      - name: Test product and integrations in Chromium
+      - name: Test product in Chromium
         run: |
-          timeout 110s node <<'NODE'
-          const { chromium } = require('playwright');
+          timeout 125s node <<'NODE'
+          const {chromium}=require('playwright');
           const APP='http://127.0.0.1:4173/';
           const log=m=>console.log('[smoke]',m);
-          async function waitReady(page,label){
-            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='10-prod',null,{timeout:15000});
-            const state=await page.evaluate(()=>({boot:document.documentElement.dataset.rumoBoot,font:getComputedStyle(document.body).fontFamily,w:document.documentElement.scrollWidth,v:innerWidth}));
-            if(state.boot!=='ready')throw new Error(`${label}: boot ${state.boot}`);
-            if(!/Inter/i.test(state.font))throw new Error(`${label}: fonte ${state.font}`);
-            if(state.w>state.v+2)throw new Error(`${label}: overflow ${state.w}/${state.v}`);
+          async function ready(page,label){
+            await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='11-prod',null,{timeout:15000});
+            await page.waitForFunction(()=>window.RUMO_INTEGRATIONS&&window.RUMO_ASSISTANT&&window.RUMO_BILLING&&window.RUMO_PRIVACY&&window.RUMO_ANALYTICS&&window.RUMO_PUSH,null,{timeout:10000});
+            const s=await page.evaluate(()=>({boot:document.documentElement.dataset.rumoBoot,font:getComputedStyle(document.body).fontFamily,w:document.documentElement.scrollWidth,v:innerWidth}));
+            if(s.boot!=='ready')throw new Error(`${label}: boot ${s.boot}`);
+            if(!/Inter/i.test(s.font))throw new Error(`${label}: font ${s.font}`);
+            if(s.w>s.v+2)throw new Error(`${label}: overflow ${s.w}/${s.v}`);
           }
-          async function desktopFlow(page,label){
+          async function desktop(page,label){
             const errors=[];page.on('pageerror',e=>errors.push(e.message));
-            const t=Date.now();await page.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(page,label);
-            await page.waitForTimeout(3500);
-            await page.waitForFunction(()=>window.RUMO_INTEGRATIONS&&window.RUMO_ASSISTANT,null,{timeout:8000});
-            await page.evaluate(()=>window.RUMO_INTEGRATIONS.open());
-            await page.waitForSelector('#integrations-v1.open',{timeout:3000});
-            await page.click('#integrations-close-v1');
-            await page.click('[data-tab="concursos"]',{timeout:3000});
-            await page.waitForSelector('#concursos.page.active');
-            await page.waitForFunction(()=>document.querySelectorAll('#all-contests .contest').length>=3,null,{timeout:8000});
-            await page.click('#all-contests .contest .contest-more',{timeout:3000});
-            await page.waitForSelector('#contest-detail-modal.open',{timeout:3000});
-            await page.click('#contest-detail-close');
-            await page.click('[data-tab="essenciais"]',{timeout:3000});
-            await page.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:8000});
-            await page.waitForTimeout(3200);
-            await page.click('#course-grid [data-course="informatica"]',{timeout:3000});
-            await page.waitForSelector('#course-modal.open .lesson-content',{timeout:3000});
-            await page.click('#close-course');
-            await page.click('[data-tab="hoje"]',{timeout:3000});
-            await page.click('#theme-toggle',{timeout:3000});await page.click('#theme-toggle',{timeout:3000});
+            const t=Date.now();await page.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await ready(page,label);await page.waitForTimeout(3500);
+            await page.evaluate(()=>window.RUMO_INTEGRATIONS.open());await page.waitForSelector('#integrations-v1.open');await page.waitForSelector('#push-card-v1');await page.click('#integrations-close-v1');
+            await page.click('#upgrade-btn');await page.waitForSelector('#upgrade-modal.open #billing-cta-v2');await page.click('#close-upgrade');
+            await page.click('[data-tab="concursos"]');await page.waitForFunction(()=>document.querySelectorAll('#all-contests .contest').length>=3,null,{timeout:8000});await page.click('#all-contests .contest .contest-more');await page.waitForSelector('#contest-detail-modal.open');await page.click('#contest-detail-close');
+            await page.click('[data-tab="essenciais"]');await page.waitForFunction(()=>window.RUMO_COURSES&&document.querySelectorAll('#course-grid .course').length>=6,null,{timeout:8000});await page.waitForTimeout(2500);await page.click('#course-grid [data-course="informatica"]');await page.waitForSelector('#course-modal.open .lesson-content');await page.click('#close-course');
+            await page.click('[data-tab="hoje"]');await page.click('#theme-toggle');await page.click('#theme-toggle');
             await page.waitForSelector('#history-open-v1',{timeout:5000});await page.click('#history-open-v1');await page.waitForSelector('#history-v1.open');await page.click('#history-close-v1');
-            const sw=await page.evaluate(async()=>('serviceWorker'in navigator)?!!(await navigator.serviceWorker.ready.catch(()=>null)):true);
-            if(!sw)throw new Error(`${label}: service worker not ready`);
-            if(errors.length)throw new Error(`${label}: JS ${errors.join(' | ')}`);
-            return Date.now()-t;
+            await page.waitForTimeout(2500);
+            const sw=await page.evaluate(async()=>('serviceWorker'in navigator)?!!(await navigator.serviceWorker.ready.catch(()=>null)):true);if(!sw)throw new Error(`${label}: service worker not ready`);
+            if(errors.length)throw new Error(`${label}: JS ${errors.join(' | ')}`);return Date.now()-t;
           }
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const cleanCtx=await browser.newContext({viewport:{width:1920,height:1080}});const clean=await cleanCtx.newPage();log(`clean ${await desktopFlow(clean,'clean')}ms`);await cleanCtx.close();
-
-            const persistedCtx=await browser.newContext({viewport:{width:1920,height:1080}});
-            await persistedCtx.addInitScript(()=>{localStorage.setItem('rumo-theme','dark');localStorage.setItem('rumo-lessons-v2',JSON.stringify({informatica:{done:[0,1],last:2}}));localStorage.setItem('rumo-guest-goal',JSON.stringify({objective_name:'SEFAZ DF 2026',cargo:'Auditor',weekly_hours:10,study_days:[1,2,3,4,5],level:'intermediario'}));sessionStorage.setItem('rumo-onboarding-shown','1')});
-            const persisted=await persistedCtx.newPage();log(`persisted ${await desktopFlow(persisted,'persisted')}ms`);await persistedCtx.close();
-
-            const degradedCtx=await browser.newContext({viewport:{width:1920,height:1080}});await degradedCtx.route('https://zycpeiyztqysjqejtour.supabase.co/**',r=>r.abort());const degraded=await degradedCtx.newPage();await degraded.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await degraded.click('[data-tab="concursos"]',{timeout:3000});await degraded.waitForSelector('#concursos.page.active');await degraded.waitForTimeout(4500);await degraded.click('[data-tab="hoje"]',{timeout:3000});await degraded.click('#theme-toggle',{timeout:3000});log('degraded interactive');await degradedCtx.close();
-
-            const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const mobile=await mobileCtx.newPage();await mobile.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(mobile,'mobile');await mobile.waitForTimeout(2500);await mobile.click('#menu',{timeout:3000});await mobile.waitForSelector('.sidebar.open');await mobile.click('[data-tab="concursos"]',{timeout:3000});const m=await mobile.evaluate(()=>({w:document.documentElement.scrollWidth,v:innerWidth}));if(m.w>m.v+2)throw new Error(`mobile overflow ${m.w}/${m.v}`);log('mobile interactive');await mobileCtx.close();
+            const cleanCtx=await browser.newContext({viewport:{width:1920,height:1080}});log(`clean ${await desktop(await cleanCtx.newPage(),'clean')}ms`);await cleanCtx.close();
+            const persistedCtx=await browser.newContext({viewport:{width:1920,height:1080}});await persistedCtx.addInitScript(()=>{localStorage.setItem('rumo-theme','dark');localStorage.setItem('rumo-lessons-v2',JSON.stringify({informatica:{done:[0,1],last:2}}));localStorage.setItem('rumo-guest-goal',JSON.stringify({objective_name:'SEFAZ DF 2026',cargo:'Auditor',weekly_hours:10,study_days:[1,2,3,4,5],level:'intermediario'}));sessionStorage.setItem('rumo-onboarding-shown','1')});log(`persisted ${await desktop(await persistedCtx.newPage(),'persisted')}ms`);await persistedCtx.close();
+            const degradedCtx=await browser.newContext({viewport:{width:1920,height:1080}});await degradedCtx.route('https://zycpeiyztqysjqejtour.supabase.co/**',r=>r.abort());const degraded=await degradedCtx.newPage();await degraded.goto(APP,{waitUntil:'domcontentloaded'});await degraded.waitForTimeout(4500);await degraded.click('[data-tab="concursos"]');await degraded.click('[data-tab="hoje"]');await degraded.click('#theme-toggle');log('degraded interactive');await degradedCtx.close();
+            const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const mobile=await mobileCtx.newPage();await mobile.goto(APP,{waitUntil:'domcontentloaded'});await ready(mobile,'mobile');await mobile.waitForTimeout(2200);await mobile.click('#menu');await mobile.waitForSelector('.sidebar.open');await mobile.click('[data-tab="concursos"]');const m=await mobile.evaluate(()=>({w:document.documentElement.scrollWidth,v:innerWidth}));if(m.w>m.v+2)throw new Error(`mobile overflow ${m.w}/${m.v}`);log('mobile interactive');await mobileCtx.close();
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

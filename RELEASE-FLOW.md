@@ -6,6 +6,7 @@ O EDEN RUMO usa o seguinte fluxo:
 2. GitHub Actions executa validação de arquitetura, dependências e browser smoke.
 3. `staging` não gera Preview automático na Vercel, evitando consumir o limite do plano Hobby.
 4. Um pull request aprovado segue para `master`.
-5. `master` publica em Production na Vercel.
+5. O PR `staging → master` usa **merge normal**, não squash, para preservar o histórico comum entre as branches.
+6. `master` publica em Production na Vercel.
 
 Regra operacional: **PROGRAME → VERIFIQUE → MELHORE → APERFEIÇOE.**

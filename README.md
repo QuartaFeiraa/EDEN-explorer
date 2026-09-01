@@ -1,18 +1,24 @@
-# NLW eSports
-## > Trilha Explorer
+# EDEN RUMO
 
-![preview](./khasam.github.io_EDEN-explorer_.png)
+**RUMO** é a plataforma de estudos e concursos da **EDEN**.
 
-Projeto de site construído do evento Next Level Week da Rocketseat.
+O projeto organiza objetivo, rotina, plano de estudo, revisões, desempenho, concursos em acompanhamento, edital em PDF, histórico e cursos Essenciais em uma única experiência.
 
-[🔗Clique aqui para dar uma olhada](https://khasam.github.io/EDEN-explorer/)
+## Identidade do projeto
 
-## 💻Tecnologias:
+- Ecossistema: **EDEN**
+- Projeto técnico: **EDEN RUMO**
+- Produto: **RUMO**
+- Área gratuita: **Essenciais**
 
-- HTML
-- CSS
-- GIT & GITHUB
+## Stack atual
 
-## 📲Contato:
+- HTML, CSS e JavaScript
+- Supabase para autenticação e dados
+- Vercel para hospedagem
+- GitHub para código e CI
+- Playwright/Chromium para smoke tests automatizados
 
-santossnatan2001@gmail.com
+## Estado
+
+Beta em desenvolvimento ativo. O fluxo de release segue: **projetar → implementar → testar → corrigir → validar → liberar**.

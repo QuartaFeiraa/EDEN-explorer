@@ -64,6 +64,10 @@
 
   let contentReady=null;
   const loadContent=()=>contentReady||(contentReady=loadScript('./app/content-v1.js'));
+  const closeCourse=()=>document.querySelector('#course-modal')?.classList.remove('open');
+  document.querySelector('#close-course')?.addEventListener('click',closeCourse);
+  document.querySelector('#course-modal')?.addEventListener('click',e=>{if(e.target?.id==='course-modal')closeCourse()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('#course-modal.open'))closeCourse()});
   document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='essenciais')loadContent().catch(()=>{})});
   document.addEventListener('click',e=>{const card=e.target.closest?.('#course-grid [data-course]');if(card&&!window.RUMO_CONTENT){e.preventDefault();e.stopImmediatePropagation();loadContent().then(()=>window.RUMO_CONTENT?.open(card.dataset.course)).catch(()=>{})}},true);
 

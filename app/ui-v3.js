@@ -16,6 +16,7 @@
   const context=document.querySelector('#top-context-title');
   const dock=[...document.querySelectorAll('[data-dock-tab]')];
 
+  function svgNode(markup){const t=document.createElement('template');t.innerHTML=markup.trim();return t.content.firstElementChild}
   function upgradeIcons(){
     document.querySelectorAll('.sidebar .nav[data-tab]').forEach(btn=>{
       const target=btn.querySelector('.nav-icon');
@@ -23,12 +24,8 @@
     });
     dock.forEach(btn=>{if(icons[btn.dataset.dockTab])btn.querySelector('svg')?.replaceWith(svgNode(icons[btn.dataset.dockTab]));});
     const more=document.querySelector('[data-dock-menu]');
-    if(more){
-      const old=more.querySelector('svg');
-      if(old)old.replaceWith(svgNode(icons.more));
-    }
+    if(more){const old=more.querySelector('svg');if(old)old.replaceWith(svgNode(icons.more));}
   }
-  function svgNode(markup){const t=document.createElement('template');t.innerHTML=markup.trim();return t.content.firstElementChild}
 
   function setActive(id){
     if(context)context.textContent=titles[id]||'RUMO';
@@ -46,8 +43,6 @@
     if(window.RUMO_SHELL?.switchTab)window.RUMO_SHELL.switchTab(id);
     else document.querySelector(`.sidebar .nav[data-tab="${id}"]`)?.click();
   }
-
-  dock.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.dockTab)));
 
   function injectMoreSheet(){
     if(document.querySelector('#rumo-more-sheet'))return;

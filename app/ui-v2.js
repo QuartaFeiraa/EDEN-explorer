@@ -1,6 +1,13 @@
 (() => {
   'use strict';
 
+  if(!document.querySelector('link[href^="./eden-brand-exact.css"]')){
+    const brandCss=document.createElement('link');
+    brandCss.rel='stylesheet';
+    brandCss.href='./eden-brand-exact.css?v=1';
+    document.head.appendChild(brandCss);
+  }
+
   const titles={
     hoje:'Visão de hoje',
     concursos:'Radar de concursos',

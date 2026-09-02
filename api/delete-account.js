@@ -3,6 +3,7 @@
 const {bearerToken,userFromToken,adminKey,adminDb,deleteAuthUser}=require('./_lib/supabase');
 
 const TERMINAL_SUBSCRIPTION_STATUS=new Set(['canceled','cancelled','expired','inactive','failed','rejected','free']);
+const MAX_BODY_BYTES=1024;
 
 function respond(res,status,data){
   res.status(status);
@@ -10,6 +11,17 @@ function respond(res,status,data){
   res.setHeader('Cache-Control','no-store');
   res.setHeader('X-Content-Type-Options','nosniff');
   res.end(JSON.stringify(data));
+}
+
+function requestBody(req){
+  const length=Number(req.headers?.['content-length']||0);
+  if(Number.isFinite(length)&&length>MAX_BODY_BYTES)throw new Error('body_too_large');
+  if(req.body&&typeof req.body==='object'&&!Buffer.isBuffer(req.body))return req.body;
+  if(typeof req.body==='string'){
+    if(Buffer.byteLength(req.body,'utf8')>MAX_BODY_BYTES)throw new Error('body_too_large');
+    try{return JSON.parse(req.body)}catch{return {}}
+  }
+  return {};
 }
 
 async function activeProviderSubscription(userId){
@@ -28,7 +40,11 @@ async function activeProviderSubscription(userId){
 module.exports=async function handler(req,res){
   if(req.method!=='POST')return respond(res,405,{error:'method_not_allowed'});
 
-  const body=req.body&&typeof req.body==='object'?req.body:{};
+  let body;
+  try{body=requestBody(req)}catch(error){
+    if(error?.message==='body_too_large')return respond(res,413,{error:'request_too_large'});
+    return respond(res,400,{error:'invalid_request'});
+  }
   if(body.confirm!=='EXCLUIR')return respond(res,400,{error:'confirmation_required'});
 
   const token=bearerToken(req);

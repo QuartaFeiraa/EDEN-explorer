@@ -34,7 +34,8 @@
         loadScript('./app/edital.js'),
         loadScript('./app/account-extras-v2.js'),
         loadScript('./app/history-v1.js'),
-        loadScript('./app/product-v1.js')
+        loadScript('./app/product-v1.js'),
+        loadScript('./app/data-rights-v1.js')
       ]).then(results=>{
         const failed=results.filter(x=>x.status==='rejected');
         if(failed.length)console.warn('RUMO optional modules degraded',failed.map(x=>x.reason));

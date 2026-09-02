@@ -1,7 +1,7 @@
 name: Validate RUMO
 on:
   push:
-    branches: [master]
+    branches: [master, rumo-v9-product-hardening]
   pull_request:
 jobs:
   syntax:
@@ -34,19 +34,30 @@ jobs:
           grep -q "done_lessons" app/courses-v2.js
           grep -q "sessoes_estudo" app/history-v1.js
           echo "RUMO v9 stable architecture OK"
+      - name: Check security invariants
+        run: |
+          grep -q "SUPABASE_JS_VERSION='2.112.4'" script.js
+          grep -q "ALLOWED_CONTEST_STATUS" script.js
+          grep -q "escapeHTML" script.js
+          grep -q "safeJSON" script.js
+          ! grep -RE "sb_secret_|SUPABASE_SERVICE_ROLE_KEY|service_role" --include='*.js' --include='*.html' .
+          grep -q '"X-Content-Type-Options"' vercel.json
+          grep -q '"X-Frame-Options"' vercel.json
+          grep -q '"Referrer-Policy"' vercel.json
+          echo "RUMO security invariants OK"
   browser-smoke:
     needs: syntax
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install browser runner
+      - name: Install pinned browser runner
         run: |
           npm init -y >/dev/null 2>&1
-          npm install --no-save playwright >/dev/null 2>&1
+          npm install --no-save --save-exact playwright@1.62.1 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
       - name: Start exact commit locally
         run: |
@@ -59,9 +70,10 @@ jobs:
           exit 1
       - name: Test stable product in Chromium
         run: |
-          timeout 100s node <<'NODE'
+          timeout 120s node <<'NODE'
           const { chromium } = require('playwright');
           const APP='http://127.0.0.1:4173/';
+          const SUPABASE='https://zycpeiyztqysjqejtour.supabase.co';
           const log=m=>console.log('[smoke]',m);
           async function waitReady(page,label){
             await page.waitForFunction(()=>document.documentElement.dataset.rumoVersion==='9-stable',null,{timeout:15000});
@@ -100,7 +112,22 @@ jobs:
             await persistedCtx.addInitScript(()=>{localStorage.setItem('rumo-theme','dark');localStorage.setItem('rumo-lessons-v2',JSON.stringify({informatica:{done:[0,1],last:2}}));localStorage.setItem('rumo-guest-goal',JSON.stringify({objective_name:'SEFAZ DF 2026',cargo:'Auditor',weekly_hours:10,study_days:[1,2,3,4,5],level:'intermediario'}));sessionStorage.setItem('rumo-onboarding-shown','1')});
             const persisted=await persistedCtx.newPage();log(`persisted ${await desktopFlow(persisted,'persisted')}ms`);await persistedCtx.close();
 
-            const degradedCtx=await browser.newContext({viewport:{width:1920,height:1080}});await degradedCtx.route('https://zycpeiyztqysjqejtour.supabase.co/**',r=>r.abort());const degraded=await degradedCtx.newPage();await degraded.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await degraded.click('[data-tab="concursos"]',{timeout:3000});await degraded.waitForSelector('#concursos.page.active');await degraded.waitForTimeout(4500);await degraded.click('[data-tab="hoje"]',{timeout:3000});await degraded.click('#theme-toggle',{timeout:3000});log('degraded interactive');await degradedCtx.close();
+            const corruptCtx=await browser.newContext({viewport:{width:1280,height:800}});
+            await corruptCtx.addInitScript(()=>localStorage.setItem('rumo-course-state','{corrompido'));
+            const corrupt=await corruptCtx.newPage();await corrupt.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(corrupt,'corrupt-storage');log('corrupt localStorage tolerated');await corruptCtx.close();
+
+            const degradedCtx=await browser.newContext({viewport:{width:1920,height:1080}});await degradedCtx.route(`${SUPABASE}/**`,r=>r.abort());const degraded=await degradedCtx.newPage();await degraded.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await degraded.click('[data-tab="concursos"]',{timeout:3000});await degraded.waitForSelector('#concursos.page.active');await degraded.waitForTimeout(4500);await degraded.click('[data-tab="hoje"]',{timeout:3000});await degraded.click('#theme-toggle',{timeout:3000});log('degraded interactive');await degradedCtx.close();
+
+            const xssCtx=await browser.newContext({viewport:{width:1280,height:800}});
+            await xssCtx.route(`${SUPABASE}/rest/v1/concursos**`,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([
+              {id:901,nome:'<img id="rumo-xss" src=x onerror="window.__rumoXss=1">',orgao:'<script>window.__rumoXss=2</script>',area:'Fiscal',status:'banca_definida',banca:'<b>malicioso</b>',vagas:'10',remuneracao:'R$ 1',uf:'DF'},
+              {id:902,nome:'Seguro 2',orgao:'Órgão',area:'Fiscal',status:'previsto',banca:'Banca',vagas:'2',remuneracao:'R$ 2',uf:'SP'},
+              {id:903,nome:'Seguro 3',orgao:'Órgão',area:'Fiscal',status:'previsto',banca:'Banca',vagas:'3',remuneracao:'R$ 3',uf:'RJ'}
+            ])}));
+            const xss=xssCtx.newPage();const xssPage=await xss;xssPage.on('pageerror',e=>{throw e});await xssPage.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(xssPage,'xss');await xssPage.waitForFunction(()=>document.querySelectorAll('#all-contests .contest').length===3,null,{timeout:8000});
+            const safety=await xssPage.evaluate(()=>({executed:window.__rumoXss||0,node:!!document.querySelector('#rumo-xss'),text:document.querySelector('#all-contests .contest h3')?.textContent||''}));
+            if(safety.executed||safety.node||!safety.text.includes('<img'))throw new Error(`xss protection failed ${JSON.stringify(safety)}`);
+            log('database HTML escaped');await xssCtx.close();
 
             const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const mobile=await mobileCtx.newPage();await mobile.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(mobile,'mobile');await mobile.waitForTimeout(2500);await mobile.click('#menu',{timeout:3000});await mobile.waitForSelector('.sidebar.open');await mobile.click('[data-tab="concursos"]',{timeout:3000});const m=await mobile.evaluate(()=>({w:document.documentElement.scrollWidth,v:innerWidth}));if(m.w>m.v+2)throw new Error(`mobile overflow ${m.w}/${m.v}`);log('mobile interactive');await mobileCtx.close();
             await browser.close();

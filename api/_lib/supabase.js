@@ -2,6 +2,7 @@
 
 const SUPABASE_URL=process.env.SUPABASE_URL||'https://zycpeiyztqysjqejtour.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY=process.env.SUPABASE_PUBLISHABLE_KEY||'sb_publishable_heHXvAxo36EvgHg_8_XOXQ_rRxE5t5H';
+const UPSTREAM_TIMEOUT_MS=8000;
 
 function jsonHeaders(extra={}){
   return {'Content-Type':'application/json',...extra};
@@ -26,10 +27,17 @@ function adminHeaders(key,extra={}){
   return headers;
 }
 
+function timeoutSignal(ms=UPSTREAM_TIMEOUT_MS){
+  return typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'
+    ? AbortSignal.timeout(ms)
+    : undefined;
+}
+
 async function userFromToken(token){
   if(!token)return null;
   const response=await fetch(`${SUPABASE_URL}/auth/v1/user`,{
-    headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${token}`}
+    headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${token}`},
+    signal:timeoutSignal()
   });
   if(!response.ok)return null;
   return response.json();
@@ -39,6 +47,7 @@ async function adminDb(path,options={}){
   const key=adminKey();
   const response=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{
     ...options,
+    signal:options.signal||timeoutSignal(),
     headers:adminHeaders(key,jsonHeaders(options.headers||{}))
   });
   return response;
@@ -48,7 +57,8 @@ async function deleteAuthUser(userId){
   const key=adminKey();
   const response=await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${encodeURIComponent(userId)}`,{
     method:'DELETE',
-    headers:adminHeaders(key)
+    headers:adminHeaders(key),
+    signal:timeoutSignal()
   });
   return response;
 }
@@ -56,9 +66,11 @@ async function deleteAuthUser(userId){
 module.exports={
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY,
+  UPSTREAM_TIMEOUT_MS,
   bearerToken,
   adminKey,
   adminHeaders,
+  timeoutSignal,
   userFromToken,
   adminDb,
   deleteAuthUser

@@ -1,53 +1,51 @@
 :root{--nav-accent:#7180ff;--nav-accent-strong:#8a92ff;--nav-cyan:#52c7ff;--nav-ease:cubic-bezier(.2,.8,.2,1)}
 
-/* Unified icon language: 20px optical size, rounded 1.8px stroke, no emoji glyphs. */
-.sidebar .nav{min-height:48px;gap:10px;padding:8px 10px;border-radius:13px;color:#9ca8ba}
-.sidebar .nav-icon{width:32px;height:32px;flex:0 0 32px;border-radius:10px;background:transparent;color:#8996ab}
-.sidebar .nav-icon svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s var(--nav-ease),stroke .18s var(--nav-ease)}
+/* One visual language: clean 21px vector icons, rounded stroke, subtle motion. */
+.sidebar .nav{min-height:48px;gap:10px;padding:8px 10px;border-radius:13px;color:#9ca8ba;font-weight:650}
+.sidebar .nav-icon{width:34px;height:34px;flex:0 0 34px;border-radius:11px;background:transparent;color:#8996ab;display:grid;place-items:center}
+.sidebar .nav-icon svg{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s var(--nav-ease),stroke .18s var(--nav-ease)}
 .sidebar .nav:hover .nav-icon{background:rgba(255,255,255,.045);color:#dce5f4}
 .sidebar .nav:hover .nav-icon svg{transform:translateY(-1px)}
 .sidebar .nav.active{background:linear-gradient(100deg,rgba(93,111,255,.15),rgba(255,255,255,.026));box-shadow:inset 0 0 0 1px rgba(119,137,255,.14)}
 .sidebar .nav.active:before{height:24px;background:linear-gradient(180deg,var(--nav-cyan),var(--nav-accent));box-shadow:0 0 14px rgba(82,199,255,.22)}
 .sidebar .nav.active .nav-icon{background:rgba(102,119,255,.12);color:#f5f7ff}
-.sidebar .nav.active .nav-icon svg{transform:scale(1.04)}
+.sidebar .nav.active .nav-icon svg{transform:scale(1.045)}
 .sidebar .nav:focus-visible{outline:2px solid rgba(113,128,255,.68);outline-offset:2px}
 
-/* White EDEN lockup on the dark navigation surface. */
-.sidebar .eden-footer img,.sidebar .eden-brand-lockup img{filter:grayscale(1) brightness(0) invert(1);opacity:.94!important}
-.sidebar .eden-footer .eden-word,.sidebar .eden-brand-lockup .eden-word{color:rgba(247,250,255,.9)!important}
+/* White EDEN signature: reliable contrast on the dark navigation surface. */
+.sidebar .eden-footer:before,.sidebar .eden-exact-mark{background:#fff!important;opacity:.97!important}
+.sidebar .eden-footer img,.sidebar .eden-brand-lockup img{filter:grayscale(1) brightness(0) invert(1);opacity:.96!important}
+.sidebar .eden-footer .eden-word,.sidebar .eden-brand-lockup .eden-word{color:rgba(247,250,255,.92)!important}
 
-/* Mobile: one navigation system only. Sidebar/drawer is removed at this breakpoint. */
+/* Remove the duplicated bottom navigation everywhere. */
+.mobile-dock{display:none!important}
+.rumo-more-backdrop,.rumo-more-sheet{display:none!important}
+
+/* Menu control follows the same icon language; no text glyph. */
+#menu{font-size:0!important;position:relative;place-items:center}
+#menu:before{content:"";width:21px;height:21px;display:block;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 7h16M4 12h16M4 17h16'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 7h16M4 12h16M4 17h16'/%3E%3C/svg%3E") center/contain no-repeat}
+
+/* Mobile keeps the sidebar as a clean off-canvas drawer: one navigation system only. */
 @media(max-width:780px){
-  .sidebar{display:none!important}
-  main{margin-left:0!important;padding-bottom:86px!important}
-  #menu{display:none!important}
+  main{margin-left:0!important;padding-bottom:0!important}
+  #menu{display:grid!important;width:40px!important;height:40px!important;border-radius:12px!important}
   .mobile-logo{display:inline-flex!important;align-items:center;font-family:Manrope,Inter,sans-serif;font-size:14px!important;font-weight:800;letter-spacing:.13em;color:var(--text)}
-  .topbar{padding-left:16px!important}
-  .mobile-dock{left:9px!important;right:9px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;height:66px!important;gap:2px!important;padding:5px!important;border-radius:19px!important;border:1px solid color-mix(in srgb,var(--line) 82%,transparent)!important;background:color-mix(in srgb,var(--surface) 88%,transparent)!important;box-shadow:0 18px 52px rgba(4,9,18,.26),inset 0 1px rgba(255,255,255,.07)!important}
-  .mobile-dock button{gap:4px!important;border-radius:14px!important;color:color-mix(in srgb,var(--muted) 92%,var(--text))!important}
-  .mobile-dock button svg{width:21px!important;height:21px!important;stroke-width:1.8!important;transition:transform .18s var(--nav-ease),stroke .18s var(--nav-ease)}
-  .mobile-dock button span{font-size:9px!important;font-weight:700!important;letter-spacing:-.01em!important}
-  .mobile-dock button.active{background:linear-gradient(180deg,rgba(103,117,255,.13),rgba(91,104,233,.08))!important;color:#8993ff!important;box-shadow:inset 0 0 0 1px rgba(118,130,255,.08)}
-  .mobile-dock button.active:after{top:1px!important;width:18px!important;height:2px!important;background:linear-gradient(90deg,var(--nav-cyan),var(--nav-accent))!important}
-  .mobile-dock button.active svg{transform:translateY(-1px) scale(1.04)}
-  .mobile-dock button:active svg{transform:scale(.92)}
+  .topbar{padding-left:12px!important;padding-right:12px!important}
+  .sidebar{
+    display:flex!important;
+    width:min(286px,88vw)!important;
+    transform:translateX(-104%)!important;
+    transition:transform .22s var(--nav-ease)!important;
+    box-shadow:24px 0 70px rgba(2,7,15,.34)!important;
+    z-index:82!important;
+  }
+  .sidebar.open{transform:translateX(0)!important}
+  .sidebar .nav{min-height:50px;font-size:13px}
+  .sidebar .nav-icon{width:35px;height:35px;flex-basis:35px}
+  .sidebar .nav-icon svg{width:22px;height:22px}
+  .rumo-sidebar-backdrop-v3{position:fixed;z-index:81;inset:0;background:rgba(2,7,14,.46);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .18s ease}
+  .rumo-sidebar-backdrop-v3.open{opacity:1;pointer-events:auto}
 }
 
-/* Lightweight mobile "More" sheet replaces the old sidebar drawer. */
-.rumo-more-backdrop{display:none;position:fixed;z-index:78;inset:0;background:rgba(3,8,16,.46);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);opacity:0;transition:opacity .18s ease}
-.rumo-more-sheet{display:none;position:fixed;z-index:79;left:9px;right:9px;bottom:max(82px,calc(env(safe-area-inset-bottom) + 76px));padding:10px;border:1px solid color-mix(in srgb,var(--line) 84%,transparent);border-radius:20px;background:color-mix(in srgb,var(--surface) 96%,transparent);box-shadow:0 30px 80px rgba(2,7,15,.34),inset 0 1px rgba(255,255,255,.06);transform:translateY(12px) scale(.985);opacity:0;transition:transform .2s var(--nav-ease),opacity .18s ease}
-.rumo-more-sheet.open,.rumo-more-backdrop.open{opacity:1}
-.rumo-more-sheet.open{transform:none}
-.rumo-more-title{display:flex;align-items:center;justify-content:space-between;padding:5px 6px 9px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
-.rumo-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.rumo-more-action{display:flex;align-items:center;gap:10px;min-height:52px;padding:9px 11px;border:1px solid color-mix(in srgb,var(--line) 88%,transparent);border-radius:14px;background:color-mix(in srgb,var(--surface-2) 95%,transparent);color:var(--text);font:600 12px Inter,sans-serif;text-align:left;cursor:pointer}
-.rumo-more-action svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:#9ba5ff}
-.rumo-more-action:active{transform:scale(.985)}
-.rumo-more-pro{grid-column:1/-1;background:linear-gradient(105deg,rgba(82,101,255,.12),rgba(82,199,255,.055));border-color:rgba(111,131,255,.15)}
-.rumo-more-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 5px 2px;margin-top:5px;border-top:1px solid color-mix(in srgb,var(--line) 78%,transparent)}
-.rumo-more-brand{display:flex;align-items:center;gap:7px;font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:12px;font-weight:600;color:rgba(247,250,255,.82)}
-.rumo-more-brand img{width:17px;height:17px;filter:grayscale(1) brightness(0) invert(1)}
-.rumo-more-links{display:flex;gap:10px}.rumo-more-links a{font-size:9px;color:var(--muted);text-decoration:none}
-@media(max-width:780px){.rumo-more-backdrop,.rumo-more-sheet{display:block;pointer-events:none}.rumo-more-backdrop.open,.rumo-more-sheet.open{pointer-events:auto}}
-
-@media(prefers-reduced-motion:reduce){.sidebar .nav-icon svg,.mobile-dock button svg,.rumo-more-sheet,.rumo-more-backdrop{transition:none!important}}
+@media(min-width:781px){.rumo-sidebar-backdrop-v3{display:none!important}}
+@media(prefers-reduced-motion:reduce){.sidebar,.sidebar .nav-icon svg,.rumo-sidebar-backdrop-v3{transition:none!important}}

@@ -35,7 +35,7 @@
         loadScript('./app/analytics-v1.js'),
         loadScript('./app/assistant.js'),
         loadScript('./app/edital.js'),
-        loadScript('./app/account-extras-v2.js'),
+        loadScript('./app/account-extras-v3.js'),
         loadScript('./app/account-privacy-v1.js'),
         loadScript('./app/history-v1.js'),
         loadScript('./app/product-v1.js'),

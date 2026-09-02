@@ -1,0 +1,56 @@
+.eden-footer{
+  display:grid;
+  justify-items:center;
+  gap:9px;
+  margin:16px 0 2px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.055);
+  color:rgba(232,238,248,.62);
+  letter-spacing:0;
+  text-transform:none;
+  font-size:inherit;
+}
+.eden-signature{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+.eden-signature img{
+  width:18px;
+  height:18px;
+  display:block;
+  flex:0 0 18px;
+}
+.eden-signature .eden-word{
+  font-family:"Plus Jakarta Sans",Inter,sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:-.035em;
+  line-height:1;
+  color:rgba(239,244,252,.82);
+}
+.eden-legal{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:9px;
+  line-height:1;
+}
+.eden-legal a{
+  color:rgba(137,150,171,.72);
+  text-decoration:none;
+  transition:color .16s ease;
+}
+.eden-legal a:hover,
+.eden-legal a:focus-visible{
+  color:rgba(225,233,246,.92);
+}
+.eden-legal span{
+  color:rgba(103,117,139,.48);
+}
+@media(max-width:780px){
+  .eden-footer{gap:8px}
+  .eden-legal{font-size:9px}
+}

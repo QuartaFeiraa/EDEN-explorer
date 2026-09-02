@@ -8,14 +8,15 @@ const TABLES={
   content_questions:['id','lesson_id','prompt','options','correct_answer','explanation','difficulty','order_index','published'],
   content_sources:['id','lesson_id','title','url','publisher','source_type','verified_at'],
   contest_content_map:['id','concurso_id','course_id','topic_pattern','priority','active'],
-  content_imports:['id','file_name','file_size','extracted_chars','status','notes']
+  content_imports:['id','file_name','file_size','extracted_chars','status','notes'],
+  content_assets:['id','file_name','object_key','mime_type','size_bytes','source_kind','status','checksum_sha256','notes']
 };
 function send(res,status,data){res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(data))}
 function safeEqual(a,b){const A=Buffer.from(String(a||'')),B=Buffer.from(String(b||''));return A.length===B.length&&A.length>0&&crypto.timingSafeEqual(A,B)}
 function auth(req){const expected=process.env.CONTENT_ADMIN_SECRET||process.env.CRON_SECRET||'';const got=req.headers['x-rumo-admin-key']||String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');return expected&&safeEqual(got,expected)}
 function clean(table,data){const allowed=new Set(TABLES[table]||[]);const out={};for(const [k,v] of Object.entries(data||{}))if(allowed.has(k))out[k]=v;return out}
 async function supa(path,options={}){const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!key)throw new Error('SUPABASE_SERVICE_ROLE_KEY ausente');const r=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',...(options.headers||{})}});const text=await r.text();let data=null;try{data=text?JSON.parse(text):null}catch(_){data=text}if(!r.ok)throw new Error(typeof data==='string'?data:(data?.message||`Supabase ${r.status}`));return data}
-async function catalog(){const names=['content_courses','content_modules','content_lessons','content_questions','content_sources','contest_content_map','content_imports'];const rows=await Promise.all(names.map(t=>supa(`${t}?select=*&order=created_at.asc`).catch(()=>[])));return Object.fromEntries(names.map((n,i)=>[n,rows[i]]))}
+async function catalog(){const names=['content_courses','content_modules','content_lessons','content_questions','content_sources','contest_content_map','content_imports','content_assets'];const rows=await Promise.all(names.map(t=>supa(`${t}?select=*&order=created_at.asc`).catch(()=>[])));return Object.fromEntries(names.map((n,i)=>[n,rows[i]]))}
 module.exports=async(req,res)=>{
   if(req.method==='OPTIONS'){res.statusCode=204;return res.end()}
   if(!auth(req))return send(res,401,{error:'Chave de administração inválida.'});

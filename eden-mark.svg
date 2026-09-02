@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="t">
+  <title id="t">EDEN</title>
+  <defs>
+    <linearGradient id="eden-g" x1="8" y1="7" x2="57" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#18b8ff"/>
+      <stop offset=".5" stop-color="#3677ff"/>
+      <stop offset="1" stop-color="#6d45ff"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#eden-g)" stroke-width="8" stroke-linecap="round">
+    <path d="M34 9.5A22.5 22.5 0 0 1 55.7 26"/>
+    <path d="M57 35.5A22.5 22.5 0 0 1 38.5 56.1"/>
+    <path d="M28.5 55.9A22.5 22.5 0 0 1 10.2 38"/>
+    <path d="M9.5 28.5A22.5 22.5 0 0 1 17.5 15"/>
+  </g>
+  <path fill="url(#eden-g)" d="M17.2 5.4c1.3 5.2 3.3 7.2 8.5 8.5-5.2 1.3-7.2 3.3-8.5 8.5-1.3-5.2-3.3-7.2-8.5-8.5 5.2-1.3 7.2-3.3 8.5-8.5Z"/>
+</svg>

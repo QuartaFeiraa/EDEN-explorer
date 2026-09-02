@@ -12,10 +12,12 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css?v=9-stable">
+  <link rel="stylesheet" href="./ui-v2.css?v=1">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
   <aside class="sidebar">
     <div class="brand" aria-label="RUMO">
       <svg class="brand-icon" viewBox="0 0 80 80" aria-hidden="true">
@@ -26,7 +28,7 @@
       <div class="brand-copy"><strong>RUMO</strong><span>estudos & concursos</span></div>
     </div>
 
-    <nav>
+    <nav aria-label="Navegação principal">
       <button class="nav active" data-tab="hoje"><span class="nav-icon">⌂</span>Hoje</button>
       <button class="nav" data-tab="concursos"><span class="nav-icon">◎</span>Concursos</button>
       <button class="nav" data-tab="meu"><span class="nav-icon">◇</span>Meu concurso</button>
@@ -40,12 +42,13 @@
       <b>Seu plano se adapta a você.</b>
       <button id="upgrade-btn">Conhecer o Pro</button>
     </div>
-    <div class="eden-footer">EDEN</div>
+    <div class="eden-footer" aria-label="Um produto EDEN"><img src="./eden-mark.svg" alt=""><span class="eden-word">eden</span></div>
   </aside>
 
-  <main>
+  <main id="main-content">
     <header class="topbar">
       <button id="menu" aria-label="Abrir menu">☰</button>
+      <div class="top-context" aria-live="polite"><span class="top-context-dot" aria-hidden="true"></span><span id="top-context-title">Visão de hoje</span></div>
       <span class="mobile-logo">RUMO</span>
       <div class="top-actions">
         <button id="theme-toggle" class="icon-btn" aria-label="Alternar tema"><span id="theme-icon">☀</span></button>
@@ -157,6 +160,14 @@
     </section>
   </main>
 
+  <nav class="mobile-dock" aria-label="Navegação rápida">
+    <button class="active" data-dock-tab="hoje" aria-label="Hoje"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5.5h5V20"/></svg><span>Hoje</span></button>
+    <button data-dock-tab="concursos" aria-label="Concursos"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4V2M20 12h2M12 20v2M4 12H2"/></svg><span>Concursos</span></button>
+    <button data-dock-tab="meu" aria-label="Meu concurso"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h5M8 16h7"/></svg><span>Meu plano</span></button>
+    <button data-dock-tab="revisoes" aria-label="Revisões"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-5"/></svg><span>Revisões</span></button>
+    <button data-dock-menu aria-label="Mais opções"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg><span>Mais</span></button>
+  </nav>
+
   <div id="modal" class="modal"><div class="modal-card"><button id="close-ai" class="close">×</button><div class="ai-orb large">✦</div><h2>Seu assistente de estudos</h2><p>Ele usa seu concurso, rotina, progresso e erros para indicar o melhor próximo passo.</p><div class="chips vertical"><button>O que devo priorizar hoje?</button><button>Reorganize minha semana</button><button>Crie uma revisão dos meus erros</button></div><div class="chat"><input placeholder="Pergunte sobre seus estudos..."><button>↑</button></div></div></div>
 
   <div id="course-modal" class="modal"><div class="modal-card course-modal-card"><button id="close-course" class="close">×</button><div id="course-modal-content"></div></div></div>
@@ -164,6 +175,7 @@
   <div id="upgrade-modal" class="modal"><div class="modal-card pricing-modal"><button id="close-upgrade" class="close">×</button><span class="plan-kicker">RUMO PRO</span><h2>Menos planejamento. Mais estudo.</h2><p>Planejamento adaptativo, edital inteligente, assistente contextual, caderno de erros e análises completas.</p><div class="price-options"><button class="price-card selected"><span>Mensal</span><b>R$ 24,90</b><small>por mês</small></button><button class="price-card"><span>Anual</span><b>R$ 199</b><small>por ano · melhor valor</small></button></div><button class="primary full">Usar o beta grátis</button></div></div>
 
   <script src="./script.js?v=9-stable"></script>
+  <script src="./app/ui-v2.js?v=1"></script>
   <script src="./app/bootstrap.js?v=9-stable"></script>
 </body>
 </html>

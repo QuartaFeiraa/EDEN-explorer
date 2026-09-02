@@ -11,6 +11,7 @@
   addCss('./product-v1.css');
   addCss('./integrations-v1.css');
   addCss('./content-v1.css');
+  addCss('./navigation-v3.css');
 
   async function boot(){
     try{
@@ -18,6 +19,7 @@
       document.documentElement.dataset.rumoData='loading';
       await window.RUMO_SDK_READY;
       await loadScript('./app/core-v2.js');
+      await loadScript('./app/ui-v3.js');
 
       await Promise.all([
         loadScript('./app/account.js'),

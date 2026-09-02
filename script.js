@@ -77,7 +77,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelec
 
 renderStudy();renderContests();renderCourses();
 
-window.RUMO_CONTESTS_READY=fetch(`${SUPABASE_URL}/rest/v1/concursos?select=*&order=destaque.desc,atualizado_em.desc&limit=80`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}})
+window.RUMO_CONTESTS_READY=fetch(`${SUPABASE_URL}/rest/v1/concursos?select=*&order=destaque.desc,atualizado_em.desc&limit=80`,{headers:{apikey:SUPABASE_KEY}})
   .then(r=>r.ok?r.json():Promise.reject(new Error('radar')))
   .then(data=>{if(Array.isArray(data)&&data.length)contests=data;window.RUMO_CONTESTS=contests;renderContests();document.dispatchEvent(new CustomEvent('rumo:contests',{detail:{contests}}));return contests})
   .catch(()=>{window.RUMO_CONTESTS=contests;return contests});

@@ -1,8 +1,15 @@
 const SUPABASE_URL='https://zycpeiyztqysjqejtour.supabase.co';
 const SUPABASE_KEY='sb_publishable_heHXvAxo36EvgHg_8_XOXQ_rRxE5t5H';
+const SUPABASE_JS_VERSION='2.112.4';
 
 window.RUMO_SDK_READY=window.supabase?Promise.resolve(window.supabase):new Promise((resolve,reject)=>{
-  const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.async=true;s.onload=()=>resolve(window.supabase);s.onerror=reject;document.head.appendChild(s);
+  const s=document.createElement('script');
+  s.src=`https://cdn.jsdelivr.net/npm/@supabase/supabase-js@${SUPABASE_JS_VERSION}`;
+  s.async=true;
+  s.crossOrigin='anonymous';
+  s.onload=()=>resolve(window.supabase);
+  s.onerror=()=>reject(new Error('Falha ao carregar o SDK do Supabase'));
+  document.head.appendChild(s);
 });
 
 const fallback=[
@@ -25,11 +32,23 @@ const courses=[
 {id:'seguranca',title:'Segurança Digital',icon:'⌾',category:'trabalho',days:5,min:15,color:'#4b91d8',desc:'Golpes, phishing, senhas, autenticação e hábitos digitais importantes.'},
 {id:'comunicacao',title:'Comunicação Profissional',icon:'◌',category:'trabalho',days:5,min:18,color:'#8b65d9',desc:'E-mails, mensagens, clareza, postura e escrita para ambientes profissionais.'}
 ];
+const ALLOWED_CONTEST_STATUS=new Set(['edital_iminente','banca_definida','previsto','edital_publicado','inscricoes_abertas','prova_marcada','encerrado']);
+const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+const safeJSON=(raw,fallbackValue)=>{try{return JSON.parse(raw)}catch{return fallbackValue}};
 let contests=[...fallback],contestStatus='all',contestQuery='';
-let courseState=JSON.parse(localStorage.getItem('rumo-course-state')||'{}');
+let courseState=safeJSON(localStorage.getItem('rumo-course-state')||'{}',{});
 
 function statusLabel(s){return ({edital_iminente:'Edital iminente',banca_definida:'Banca definida',previsto:'Previsto',edital_publicado:'Edital publicado',inscricoes_abertas:'Inscrições abertas',prova_marcada:'Prova marcada',encerrado:'Encerrado'})[s]||'Em acompanhamento'}
-function contestHTML(c){return `<article class="contest"><div class="contest-top"><span class="status ${c.status||''}">${statusLabel(c.status)}</span><span class="meta-state">${c.uf||'BR'}</span></div><h3>${c.nome}</h3><p>${c.orgao}</p><div class="meta"><span>${c.banca||'Banca a definir'}</span><span>${c.vagas||'A definir'} vagas</span></div><b class="salary">${c.remuneracao||'Remuneração a definir'}</b></article>`}
+function contestHTML(c){
+  const status=ALLOWED_CONTEST_STATUS.has(c?.status)?c.status:'';
+  const uf=escapeHTML(c?.uf||'BR');
+  const nome=escapeHTML(c?.nome||'Concurso');
+  const orgao=escapeHTML(c?.orgao||'Órgão a definir');
+  const banca=escapeHTML(c?.banca||'Banca a definir');
+  const vagas=escapeHTML(c?.vagas||'A definir');
+  const remuneracao=escapeHTML(c?.remuneracao||'Remuneração a definir');
+  return `<article class="contest"><div class="contest-top"><span class="status ${status}">${escapeHTML(statusLabel(status))}</span><span class="meta-state">${uf}</span></div><h3>${nome}</h3><p>${orgao}</p><div class="meta"><span>${banca}</span><span>${vagas} vagas</span></div><b class="salary">${remuneracao}</b></article>`;
+}
 function filtered(){return contests.filter(c=>`${c.nome} ${c.orgao} ${c.area||''} ${c.uf||''}`.toLowerCase().includes(contestQuery)&&(contestStatus==='all'||c.status===contestStatus))}
 function renderContests(){
   document.querySelector('#featured').innerHTML=contests.slice(0,4).map(contestHTML).join('');

@@ -10,6 +10,7 @@
   addCss('./radar-v3.css');
   addCss('./product-v1.css');
   addCss('./integrations-v1.css');
+  addCss('./content-v1.css');
 
   async function boot(){
     try{
@@ -61,10 +62,14 @@
     .catch(()=>[])
     .finally(()=>loadScript('./app/radar-v2.js').catch(err=>console.warn('Radar indisponível',err)));
 
-  let coursesReady=null;
-  const loadCourses=()=>coursesReady||(coursesReady=loadScript('./app/courses-v2.js'));
-  document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='essenciais')loadCourses().catch(()=>{})});
-  document.addEventListener('click',e=>{const card=e.target.closest?.('#course-grid [data-course]');if(card&&!window.RUMO_COURSES){e.preventDefault();e.stopImmediatePropagation();loadCourses().then(()=>window.RUMO_COURSES?.open(card.dataset.course)).catch(()=>{})}},true);
+  let contentReady=null;
+  const loadContent=()=>contentReady||(contentReady=loadScript('./app/content-v1.js'));
+  const closeCourse=()=>document.querySelector('#course-modal')?.classList.remove('open');
+  document.querySelector('#close-course')?.addEventListener('click',closeCourse);
+  document.querySelector('#course-modal')?.addEventListener('click',e=>{if(e.target?.id==='course-modal')closeCourse()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('#course-modal.open'))closeCourse()});
+  document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='essenciais')loadContent().catch(()=>{})});
+  document.addEventListener('click',e=>{const card=e.target.closest?.('#course-grid [data-course]');if(card&&!window.RUMO_CONTENT){e.preventDefault();e.stopImmediatePropagation();loadContent().then(()=>window.RUMO_CONTENT?.open(card.dataset.course)).catch(()=>{})}},true);
 
   boot();
 })();

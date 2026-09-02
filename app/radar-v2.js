@@ -4,8 +4,9 @@
   let rows=[],watch=new Set(),watchLoaded=false;
   const statusText={previsto:'Previsto',banca_definida:'Banca definida',edital_iminente:'Edital iminente',edital_publicado:'Edital publicado',inscricoes_abertas:'Inscrições abertas',prova_marcada:'Prova marcada',encerrado:'Encerrado'};
   const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const safeStatus=v=>Object.prototype.hasOwnProperty.call(statusText,v)?v:'';
   const fmtDate=v=>v?new Date(`${String(v).slice(0,10)}T12:00:00`).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):'A definir';
-  const sourceOf=c=>c.fonte_oficial_url||c.fonte_url||'';
+  const sourceOf=c=>{const raw=String(c?.fonte_oficial_url||c?.fonte_url||'').trim();if(!raw)return'';try{const url=new URL(raw);return url.protocol==='https:'||url.protocol==='http:'?url.href:''}catch{return''}};
   function summary(c){
     if(c.resumo)return c.resumo;
     const area=c.area?`na área ${String(c.area).toLowerCase()}`:'em acompanhamento';
@@ -81,8 +82,8 @@
   async function open(c){
     inject();
     await loadWatch();
-    const modal=document.querySelector('#contest-detail-modal'),box=document.querySelector('#contest-detail-content'),source=sourceOf(c),following=watch.has(String(c.id));
-    box.innerHTML=`<div class="contest-detail-top"><div><span class="status ${esc(c.status||'')}">${esc(statusText[c.status]||'Em acompanhamento')}</span><h2>${esc(c.nome)}</h2><p class="contest-detail-org">${esc(c.orgao||'')}</p></div><div class="contest-detail-state">${esc(c.uf||'BR')}</div></div><p class="contest-detail-summary">${esc(summary(c))}</p><div class="contest-detail-grid">${cell('Situação',c.edital_previsto||statusText[c.status])}${cell('Banca',c.banca||'A definir')}${cell('Vagas',c.vagas||'A definir')}${cell('Escolaridade',c.escolaridade||'A definir')}${cell('Remuneração',c.remuneracao||'A definir',true)}${cell('Área',c.area||'Diversas')}${cell('Cargos',c.cargos,true)}${cell('Requisitos',c.requisitos,true)}${c.inscricoes_fim?cell('Fim das inscrições',fmtDate(c.inscricoes_fim)):''}${c.prova_data?cell('Prova',fmtDate(c.prova_data)):''}</div><div class="contest-detail-note"><b>O que observar agora</b><p>${esc(note(c))}</p></div><div class="contest-detail-actions-v2"><button class="primary" id="contest-goal-v2">Usar como meu objetivo</button><button class="secondary" id="contest-watch-v2">${following?'★ Acompanhando':'☆ Acompanhar'}</button></div><div class="contest-detail-footer"><span>${esc(updated(c.atualizado_em))}</span>${source?'<button type="button" id="contest-source-btn">Abrir fonte ↗</button>':''}</div><p class="contest-detail-disclaimer">Confirme datas, vagas, requisitos e remuneração no edital e nos canais oficiais.</p>`;
+    const modal=document.querySelector('#contest-detail-modal'),box=document.querySelector('#contest-detail-content'),source=sourceOf(c),following=watch.has(String(c.id)),status=safeStatus(c.status);
+    box.innerHTML=`<div class="contest-detail-top"><div><span class="status ${status}">${esc(statusText[status]||'Em acompanhamento')}</span><h2>${esc(c.nome)}</h2><p class="contest-detail-org">${esc(c.orgao||'')}</p></div><div class="contest-detail-state">${esc(c.uf||'BR')}</div></div><p class="contest-detail-summary">${esc(summary(c))}</p><div class="contest-detail-grid">${cell('Situação',c.edital_previsto||statusText[status])}${cell('Banca',c.banca||'A definir')}${cell('Vagas',c.vagas||'A definir')}${cell('Escolaridade',c.escolaridade||'A definir')}${cell('Remuneração',c.remuneracao||'A definir',true)}${cell('Área',c.area||'Diversas')}${cell('Cargos',c.cargos,true)}${cell('Requisitos',c.requisitos,true)}${c.inscricoes_fim?cell('Fim das inscrições',fmtDate(c.inscricoes_fim)):''}${c.prova_data?cell('Prova',fmtDate(c.prova_data)):''}</div><div class="contest-detail-note"><b>O que observar agora</b><p>${esc(note(c))}</p></div><div class="contest-detail-actions-v2"><button class="primary" id="contest-goal-v2">Usar como meu objetivo</button><button class="secondary" id="contest-watch-v2">${following?'★ Acompanhando':'☆ Acompanhar'}</button></div><div class="contest-detail-footer"><span>${esc(updated(c.atualizado_em))}</span>${source?'<button type="button" id="contest-source-btn">Abrir fonte ↗</button>':''}</div><p class="contest-detail-disclaimer">Confirme datas, vagas, requisitos e remuneração no edital e nos canais oficiais.</p>`;
     box.querySelector('#contest-goal-v2').onclick=()=>setGoal(c);
     box.querySelector('#contest-watch-v2').onclick=e=>toggleWatch(c,e.currentTarget);
     const sourceBtn=box.querySelector('#contest-source-btn');if(sourceBtn)sourceBtn.onclick=()=>window.open(source,'_blank','noopener,noreferrer');
@@ -96,7 +97,7 @@
       const title=card.querySelector('h3')?.textContent?.trim(),c=rows.find(x=>String(x.nome).trim()===title);
       if(!c)continue;
       card.dataset.radarV2='1';
-      const badge=card.querySelector('.status');if(badge){badge.className=`status ${c.status||''}`;badge.textContent=statusText[c.status]||'Em acompanhamento'}
+      const badge=card.querySelector('.status');if(badge){const status=safeStatus(c.status);badge.className=`status ${status}`;badge.textContent=statusText[status]||'Em acompanhamento'}
       const org=card.querySelector('p');
       if(org&&!card.querySelector('.contest-summary')){org.classList.add('contest-org');org.insertAdjacentHTML('afterend',`<p class="contest-summary">${esc(summary(c))}</p>`)}
       const footer=document.createElement('div');footer.className='contest-actions';footer.innerHTML=`<button type="button" class="contest-more">Ver detalhes</button><span>${esc(updated(c.atualizado_em))}</span>`;card.appendChild(footer);

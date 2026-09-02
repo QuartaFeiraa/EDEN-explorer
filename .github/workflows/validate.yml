@@ -15,6 +15,7 @@ jobs:
         run: |
           node --check script.js
           for f in app/*.js; do echo "checking $f"; node --check "$f"; done
+          if [ -d api ]; then find api -name '*.js' -type f -print0 | xargs -0 -n1 node --check; fi
       - name: Check stable architecture
         run: |
           grep -q "RELEASE='9-stable'" app/bootstrap.js
@@ -22,6 +23,7 @@ jobs:
           grep -q "courses-v2.js" app/bootstrap.js
           grep -q "history-v1.js" app/bootstrap.js
           grep -q "product-v1.js" app/bootstrap.js
+          grep -q "data-rights-v1.js" app/bootstrap.js
           grep -q "product-v1.css" app/bootstrap.js
           grep -q "styles.css?v=9-stable" index.html
           grep -q "script.js?v=9-stable" index.html
@@ -40,11 +42,29 @@ jobs:
           grep -q "ALLOWED_CONTEST_STATUS" script.js
           grep -q "escapeHTML" script.js
           grep -q "safeJSON" script.js
-          ! grep -RE "sb_secret_|SUPABASE_SERVICE_ROLE_KEY|service_role" --include='*.js' --include='*.html' .
+          ! grep -RE "sb_secret_|SUPABASE_SERVICE_ROLE_KEY|service_role" script.js app/*.js ./*.html
+          grep -q "SUPABASE_SECRET_KEY" api/_lib/supabase.js
+          grep -q "startsWith('sb_secret_')" api/_lib/supabase.js
+          grep -q "active_subscription" api/delete-account.js
+          grep -q "body.confirm!=='EXCLUIR'" api/delete-account.js
+          grep -q "safeStatus" app/radar-v2.js
+          grep -q "url.protocol==='https:'" app/radar-v2.js
           grep -q '"X-Content-Type-Options"' vercel.json
           grep -q '"X-Frame-Options"' vercel.json
           grep -q '"Referrer-Policy"' vercel.json
           echo "RUMO security invariants OK"
+      - name: Check deletion endpoint fails closed
+        run: |
+          node <<'NODE'
+          const handler=require('./api/delete-account');
+          function res(){return {code:0,headers:{},body:'',status(n){this.code=n;return this},setHeader(k,v){this.headers[k]=v},end(v){this.body=v||''}}}
+          (async()=>{
+            let r=res();await handler({method:'GET',headers:{},body:{}},r);if(r.code!==405)throw new Error(`GET expected 405, got ${r.code}`);
+            r=res();await handler({method:'POST',headers:{},body:{}},r);if(r.code!==400)throw new Error(`missing confirmation expected 400, got ${r.code}`);
+            r=res();await handler({method:'POST',headers:{},body:{confirm:'EXCLUIR'}},r);if(r.code!==401)throw new Error(`missing auth expected 401, got ${r.code}`);
+            console.log('delete-account fail-closed contract OK');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
   browser-smoke:
     needs: syntax
     runs-on: ubuntu-latest
@@ -101,6 +121,7 @@ jobs:
             await page.click('[data-tab="hoje"]',{timeout:3000});
             await page.click('#theme-toggle',{timeout:3000});await page.click('#theme-toggle',{timeout:3000});
             await page.waitForSelector('#history-open-v1',{timeout:5000});await page.click('#history-open-v1');await page.waitForSelector('#history-v1.open');await page.click('#history-close-v1');
+            await page.waitForFunction(()=>!!window.RUMO_DATA_RIGHTS,null,{timeout:5000});
             if(errors.length)throw new Error(`${label}: JS ${errors.join(' | ')}`);
             return Date.now()-t;
           }
@@ -120,14 +141,15 @@ jobs:
 
             const xssCtx=await browser.newContext({viewport:{width:1280,height:800}});
             await xssCtx.route(`${SUPABASE}/rest/v1/concursos**`,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([
-              {id:901,nome:'<img id="rumo-xss" src=x onerror="window.__rumoXss=1">',orgao:'<script>window.__rumoXss=2</script>',area:'Fiscal',status:'banca_definida',banca:'<b>malicioso</b>',vagas:'10',remuneracao:'R$ 1',uf:'DF'},
+              {id:901,nome:'<img id="rumo-xss" src=x onerror="window.__rumoXss=1">',orgao:'<script>window.__rumoXss=2</script>',area:'Fiscal',status:'banca_definida injected-class',banca:'<b>malicioso</b>',vagas:'10',remuneracao:'R$ 1',uf:'DF',fonte_url:'javascript:window.__rumoXss=3'},
               {id:902,nome:'Seguro 2',orgao:'Órgão',area:'Fiscal',status:'previsto',banca:'Banca',vagas:'2',remuneracao:'R$ 2',uf:'SP'},
               {id:903,nome:'Seguro 3',orgao:'Órgão',area:'Fiscal',status:'previsto',banca:'Banca',vagas:'3',remuneracao:'R$ 3',uf:'RJ'}
             ])}));
-            const xss=xssCtx.newPage();const xssPage=await xss;xssPage.on('pageerror',e=>{throw e});await xssPage.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(xssPage,'xss');await xssPage.waitForFunction(()=>document.querySelectorAll('#all-contests .contest').length===3,null,{timeout:8000});
-            const safety=await xssPage.evaluate(()=>({executed:window.__rumoXss||0,node:!!document.querySelector('#rumo-xss'),text:document.querySelector('#all-contests .contest h3')?.textContent||''}));
-            if(safety.executed||safety.node||!safety.text.includes('<img'))throw new Error(`xss protection failed ${JSON.stringify(safety)}`);
-            log('database HTML escaped');await xssCtx.close();
+            const xssPage=await xssCtx.newPage();xssPage.on('pageerror',e=>{throw e});await xssPage.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(xssPage,'xss');await xssPage.waitForFunction(()=>document.querySelectorAll('#all-contests .contest').length===3,null,{timeout:8000});await xssPage.waitForSelector('#all-contests .contest .contest-more',{timeout:5000});
+            const safety=await xssPage.evaluate(()=>({executed:window.__rumoXss||0,node:!!document.querySelector('#rumo-xss'),text:document.querySelector('#all-contests .contest h3')?.textContent||'',badge:document.querySelector('#all-contests .contest .status')?.className||''}));
+            if(safety.executed||safety.node||!safety.text.includes('<img')||safety.badge.includes('injected-class'))throw new Error(`xss protection failed ${JSON.stringify(safety)}`);
+            await xssPage.click('#all-contests .contest .contest-more');await xssPage.waitForSelector('#contest-detail-modal.open');if(await xssPage.locator('#contest-source-btn').count())throw new Error('unsafe source protocol rendered');
+            log('database HTML, status and source URL protected');await xssCtx.close();
 
             const mobileCtx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const mobile=await mobileCtx.newPage();await mobile.goto(APP,{waitUntil:'domcontentloaded',timeout:20000});await waitReady(mobile,'mobile');await mobile.waitForTimeout(2500);await mobile.click('#menu',{timeout:3000});await mobile.waitForSelector('.sidebar.open');await mobile.click('[data-tab="concursos"]',{timeout:3000});const m=await mobile.evaluate(()=>({w:document.documentElement.scrollWidth,v:innerWidth}));if(m.w>m.v+2)throw new Error(`mobile overflow ${m.w}/${m.v}`);log('mobile interactive');await mobileCtx.close();
             await browser.close();

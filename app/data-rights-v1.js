@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const R=()=>window.RUMO;
+  const SUPABASE_AUTH_PREFIX='sb-zycpeiyztqysjqejtour-auth-token';
 
   const OWNED_TABLES=[
     'user_goals','user_concursos','plano_tarefas','sessoes_estudo','study_sessions',
@@ -84,6 +85,10 @@
 
   function clearLocalUserData(){
     ['rumo-guest-goal','rumo-lessons-v2','rumo-course-state','rumo-beta-interest'].forEach(k=>localStorage.removeItem(k));
+    for(let i=localStorage.length-1;i>=0;i--){
+      const key=localStorage.key(i);
+      if(key?.startsWith(SUPABASE_AUTH_PREFIX))localStorage.removeItem(key);
+    }
     sessionStorage.removeItem('rumo-onboarding-shown');
   }
 
@@ -103,8 +108,8 @@
         msg.className='form-message error';msg.textContent='Ainda existem arquivos associados à conta. A exclusão foi interrompida com segurança.';return
       }
       if(!response.ok){msg.className='form-message error';msg.textContent='Não foi possível excluir a conta agora.';return}
+      await r.sb.auth.signOut({scope:'local'}).catch(()=>{});
       clearLocalUserData();
-      await r.sb.auth.signOut().catch(()=>{});
       location.replace(location.origin+location.pathname);
     }catch(_){
       msg.className='form-message error';msg.textContent='Não foi possível excluir a conta agora.';

@@ -24,6 +24,18 @@ function requestBody(req){
   return {};
 }
 
+function crossSiteRequest(req){
+  const site=String(req.headers?.['sec-fetch-site']||'').trim().toLowerCase();
+  if(site==='cross-site')return true;
+  const origin=String(req.headers?.origin||'').trim();
+  if(!origin)return false;
+  const proto=String(req.headers?.['x-forwarded-proto']||'https').split(',')[0].trim().toLowerCase();
+  const host=String(req.headers?.['x-forwarded-host']||req.headers?.host||'').split(',')[0].trim().toLowerCase();
+  if(!host||!['http','https'].includes(proto))return true;
+  try{return new URL(origin).origin.toLowerCase()!==`${proto}://${host}`}
+  catch{return true}
+}
+
 async function activeProviderSubscription(userId){
   const query=`subscriptions?user_id=eq.${encodeURIComponent(userId)}&select=status,provider,provider_subscription_id,cancel_at_period_end&limit=20`;
   const response=await adminDb(query);
@@ -38,7 +50,11 @@ async function activeProviderSubscription(userId){
 }
 
 module.exports=async function handler(req,res){
-  if(req.method!=='POST')return respond(res,405,{error:'method_not_allowed'});
+  if(req.method!=='POST'){
+    res.setHeader('Allow','POST');
+    return respond(res,405,{error:'method_not_allowed'});
+  }
+  if(crossSiteRequest(req))return respond(res,403,{error:'cross_site_request_blocked'});
 
   let body;
   try{body=requestBody(req)}catch(error){

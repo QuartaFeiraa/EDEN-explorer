@@ -1,0 +1,62 @@
+name: RUMO hardening contracts
+on:
+  push:
+    branches: [master, rumo-v9-product-hardening]
+  pull_request:
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate PWA and server syntax
+        run: |
+          node --check sw.js
+          node --check app/pwa-v1.js
+          node --check app/security-normalize-v1.js
+          node --check app/data-rights-v1.js
+          node --check api/_lib/supabase.js
+          node --check api/delete-account.js
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest ok')"
+      - name: Validate hardening invariants
+        run: |
+          grep -q "security-normalize-v1.js" app/bootstrap.js
+          grep -q "pwa-v1.js" app/bootstrap.js
+          grep -q "ALLOWED_PRIORITY" app/security-normalize-v1.js
+          grep -q "url.origin!==self.location.origin" sw.js
+          grep -q "url.pathname.startsWith('/api/')" sw.js
+          grep -q "Service-Worker-Allowed" vercel.json
+          grep -q "AbortSignal.timeout" api/_lib/supabase.js
+          grep -q "cross_site_request_blocked" api/delete-account.js
+          grep -q "SUPABASE_AUTH_PREFIX" app/data-rights-v1.js
+          grep -q "scope:'local'" app/data-rights-v1.js
+          grep -q '^\.env$' .gitignore
+          test -f PRIVACY.md
+          test -f docs/ACTIVE-SURFACE.md
+      - name: Verify security normalizer fail-closed values
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const listeners={};
+          const context={window:{RUMO:{state:{materias:[]}}},document:{addEventListener:(n,f)=>listeners[n]=f}};
+          vm.createContext(context);vm.runInContext(fs.readFileSync('app/security-normalize-v1.js','utf8'),context);
+          const safe=context.window.RUMO_SECURITY_NORMALIZE.safePriority;
+          if(safe('alta')!=='alta'||safe('media')!=='media'||safe('baixa')!=='baixa')throw new Error('valid priorities changed');
+          if(safe('alta injected-class')!=='media'||safe('<script>')!=='media')throw new Error('unsafe priority not rejected');
+          console.log('priority allowlist ok');
+          NODE
+      - name: Verify destructive endpoint rejects cross-site calls
+        run: |
+          node <<'NODE'
+          const handler=require('./api/delete-account');
+          function res(){return {code:0,headers:{},body:'',status(n){this.code=n;return this},setHeader(k,v){this.headers[k]=v},end(v){this.body=v||''}}}
+          (async()=>{
+            const r=res();
+            await handler({method:'POST',headers:{origin:'https://evil.invalid','sec-fetch-site':'cross-site'},body:{confirm:'EXCLUIR'}},r);
+            if(r.code!==403)throw new Error(`cross-site expected 403, got ${r.code}`);
+            console.log('cross-site deletion blocked');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE

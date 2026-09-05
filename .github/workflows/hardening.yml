@@ -17,6 +17,9 @@ jobs:
           node --check sw.js
           node --check app/pwa-v1.js
           node --check app/security-normalize-v1.js
+          node --check app/planner-v1.js
+          node --check app/engine-v2.js
+          node --check app/schedule-guard.js
           node --check app/data-rights-v1.js
           node --check api/_lib/supabase.js
           node --check api/delete-account.js
@@ -24,18 +27,55 @@ jobs:
       - name: Validate hardening invariants
         run: |
           grep -q "security-normalize-v1.js" app/bootstrap.js
+          grep -q "planner-v1.js" app/bootstrap.js
           grep -q "pwa-v1.js" app/bootstrap.js
           grep -q "ALLOWED_PRIORITY" app/security-normalize-v1.js
+          grep -q "plannedCounts" app/planner-v1.js
+          grep -q "ignoreDuplicates:true" app/engine-v2.js
+          grep -q "onConflict:'user_id,data,topico_id,tipo'" app/engine-v2.js
           grep -q "url.origin!==self.location.origin" sw.js
           grep -q "url.pathname.startsWith('/api/')" sw.js
+          grep -q "rumo-static-.*v2\|CACHE_PREFIX='rumo-static-'" sw.js
           grep -q "Service-Worker-Allowed" vercel.json
           grep -q "AbortSignal.timeout" api/_lib/supabase.js
+          grep -q "sessionIdFromToken" api/_lib/supabase.js
+          grep -q "rumo_session_active" api/_lib/supabase.js
+          grep -q "rumo_user_owns_storage_objects" api/_lib/supabase.js
+          grep -q "revokeAuthSessions" api/delete-account.js
           grep -q "cross_site_request_blocked" api/delete-account.js
           grep -q "SUPABASE_AUTH_PREFIX" app/data-rights-v1.js
           grep -q "scope:'local'" app/data-rights-v1.js
           grep -q '^\.env$' .gitignore
           test -f PRIVACY.md
+          test -f DESIGN.md
+          test -f AGENTS.md
           test -f docs/ACTIVE-SURFACE.md
+      - name: Verify planner rotates topics without ignoring real priority
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const context={window:{}};
+          vm.createContext(context);
+          vm.runInContext(fs.readFileSync('app/planner-v1.js','utf8'),context);
+          const planner=context.window.RUMO_PLANNER;
+          const topics=[
+            {id:'a',materia_id:'m1',nome:'A',status:'nao_iniciado',acertos:0,erros:0},
+            {id:'b',materia_id:'m2',nome:'B',status:'nao_iniciado',acertos:0,erros:0},
+            {id:'c',materia_id:'m3',nome:'C',status:'nao_iniciado',acertos:0,erros:0}
+          ];
+          const mats=new Map([['m1',{peso:1.5}],['m2',{peso:1.2}],['m3',{peso:1.0}]]);
+          const counts=new Map();
+          const picks=[];
+          for(let i=0;i<3;i++){
+            const t=planner.chooseTopic({topics,date:`2026-09-0${5+i}`,mode:'estudo',usedTopicIds:new Set(),usedMateriaIds:new Set(),plannedCounts:counts,materiaById:id=>mats.get(id)});
+            picks.push(t.id);counts.set(t.id,(counts.get(t.id)||0)+1);
+          }
+          if(new Set(picks).size<2)throw new Error(`planner failed to rotate: ${picks.join(',')}`);
+          const due={id:'due',materia_id:'m3',nome:'Due',status:'estudando',acertos:8,erros:2,proxima_revisao:'2026-09-05T00:00:00Z'};
+          const review=planner.chooseTopic({topics:[...topics,due],date:'2026-09-05',mode:'revisao',usedTopicIds:new Set(),usedMateriaIds:new Set(),plannedCounts:new Map([['due',4]]),materiaById:id=>mats.get(id)});
+          if(review.id!=='due')throw new Error(`due review lost priority: ${review.id}`);
+          console.log('adaptive planner rotation ok');
+          NODE
       - name: Verify security normalizer fail-closed values
         run: |
           node <<'NODE'
@@ -47,6 +87,16 @@ jobs:
           if(safe('alta')!=='alta'||safe('media')!=='media'||safe('baixa')!=='baixa')throw new Error('valid priorities changed');
           if(safe('alta injected-class')!=='media'||safe('<script>')!=='media')throw new Error('unsafe priority not rejected');
           console.log('priority allowlist ok');
+          NODE
+      - name: Verify JWT session parser fails closed
+        run: |
+          node <<'NODE'
+          const helper=require('./api/_lib/supabase');
+          const payload=Buffer.from(JSON.stringify({session_id:'11111111-1111-4111-8111-111111111111'})).toString('base64url');
+          const token=`e30.${payload}.sig`;
+          if(helper.sessionIdFromToken(token)!=='11111111-1111-4111-8111-111111111111')throw new Error('valid session_id rejected');
+          if(helper.sessionIdFromToken('bad')!==''||helper.sessionIdFromToken(`e30.${Buffer.from('{').toString('base64url')}.x`)!=='')throw new Error('invalid JWT accepted');
+          console.log('session parser fail-closed ok');
           NODE
       - name: Verify destructive endpoint rejects cross-site calls
         run: |

@@ -17,6 +17,7 @@
       await window.RUMO_SDK_READY;
       await loadScript('./app/core-v2.js');
       await loadScript('./app/security-normalize-v1.js');
+      await loadScript('./app/planner-v1.js');
 
       await Promise.all([
         loadScript('./app/account.js'),

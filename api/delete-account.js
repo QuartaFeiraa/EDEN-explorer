@@ -1,6 +1,16 @@
 'use strict';
 
-const {bearerToken,userFromToken,adminKey,adminDb,deleteAuthUser}=require('./_lib/supabase');
+const {
+  bearerToken,
+  userFromToken,
+  adminKey,
+  adminDb,
+  sessionIdFromToken,
+  sessionIsActive,
+  userOwnsStorageObjects,
+  revokeAuthSessions,
+  deleteAuthUser
+}=require('./_lib/supabase');
 
 const TERMINAL_SUBSCRIPTION_STATUS=new Set(['canceled','cancelled','expired','inactive','failed','rejected','free']);
 const MAX_BODY_BYTES=1024;
@@ -71,6 +81,11 @@ module.exports=async function handler(req,res){
     const user=await userFromToken(token);
     if(!user?.id)return respond(res,401,{error:'unauthorized'});
 
+    const sessionId=sessionIdFromToken(token);
+    if(!sessionId||!(await sessionIsActive(user.id,sessionId))){
+      return respond(res,401,{error:'inactive_session'});
+    }
+
     const active=await activeProviderSubscription(user.id);
     if(active){
       return respond(res,409,{
@@ -79,14 +94,24 @@ module.exports=async function handler(req,res){
       });
     }
 
+    if(await userOwnsStorageObjects(user.id)){
+      return respond(res,409,{error:'owned_storage_objects'});
+    }
+
+    const revoke=await revokeAuthSessions(token,'global');
+    if(!revoke.ok){
+      console.error('delete-account: session revocation failed',revoke.status);
+      return respond(res,502,{error:'session_revocation_failed'});
+    }
+
     const deletion=await deleteAuthUser(user.id);
     if(!deletion.ok){
       const text=await deletion.text().catch(()=>'');
       if(/storage|object owner|owns/i.test(text)){
-        return respond(res,409,{error:'owned_storage_objects'});
+        return respond(res,409,{error:'owned_storage_objects',sessions_revoked:true});
       }
       console.error('delete-account: auth deletion failed',deletion.status);
-      return respond(res,502,{error:'account_deletion_failed'});
+      return respond(res,502,{error:'account_deletion_failed',sessions_revoked:true});
     }
 
     return respond(res,200,{ok:true});

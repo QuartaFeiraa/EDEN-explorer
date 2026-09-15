@@ -10,6 +10,7 @@
   addCss('./radar-v3.css');
   addCss('./product-v1.css');
   addCss('./enem-v1.css');
+  addCss('./enem-visual-v2.css');
 
   async function boot(){
     try{
@@ -20,6 +21,7 @@
       await loadScript('./app/security-normalize-v1.js');
       await loadScript('./app/planner-v1.js');
       await loadScript('./app/enem-core-v1.js');
+      await loadScript('./app/enem-visual-v2.js');
 
       await Promise.all([
         loadScript('./app/account.js'),

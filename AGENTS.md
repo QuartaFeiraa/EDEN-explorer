@@ -11,63 +11,76 @@ These rules apply to every automated or human change in this repository.
 
 A feature that violates a higher priority does not ship because it improves a lower one.
 
-## Protected baseline
+## Active line
 
-- Golden functional baseline: RUMO v9 stable.
-- Current hardening line: `rumo-v9-product-hardening`.
-- Do not merge the divergent post-v9 `master` history blindly.
-- Preserve working behavior first; add changes in small, reversible commits.
+- Golden historical baseline: RUMO v9 stable.
+- Audited parent: `rumo-v9-product-hardening` at `e34e8d6`.
+- Active product line: `rumo-enem-v1`.
+- ENEM is the primary product axis; important concursos is the second.
+- Do not blindly merge the divergent post-v9 `master` history.
+- Preserve reversible commits and a working deploy at every release gate.
 
 ## Architecture
 
-- Cloud only. Do not require the user's PC to stay online.
-- Free/open-source first and no vendor lock-in where practical.
-- Supabase is the authenticated system of record for the current product.
+- Cloud only; never require a home PC/server.
+- Free/open-source first and avoid provider lock-in where practical.
+- Supabase is the authenticated system of record.
 - Browser code is untrusted.
-- Vercel functions are trusted adapters only when privileged work is necessary.
-- Keep guest/local-first usefulness where it already exists.
-- Provider-specific integrations must sit behind adapters so they can be replaced.
+- Privileged answer/solution access stays server-side.
+- Guest mode may use local state, but authenticated history belongs in Supabase.
+- Heavy immutable source files must not be stuffed into Postgres when a static/object reference is enough.
 
-Read `ARCHITECTURE.md`, `SECURITY.md`, `PRIVACY.md` and `DESIGN.md` before changing cross-cutting behavior.
+Read `ARCHITECTURE.md`, `SECURITY.md`, `PRIVACY.md` and `DESIGN.md` before cross-cutting changes.
+
+## ENEM content rules
+
+- Structural taxonomy must follow official Inep references where applicable.
+- Never label an original RUMO question as an official ENEM question.
+- Official/adapted content must retain source, year and provenance before publication.
+- Browser-readable question rows never include the answer key.
+- Solutions stay in a non-client-readable table and are returned only after submission through the answer service.
+- Every published question needs a deterministic answer and explanation.
+- AI-generated content, if introduced later, must remain draft/unverified until deterministic or human validation.
+- Simulations do not reveal per-question feedback before completion.
+- Redação tools must not present an unofficial automated score as an official ENEM grade.
 
 ## Security requirements
 
-- Never commit server secrets, service-role keys, tokens or credentials.
+- Never commit secrets, service-role keys, tokens or credentials.
 - Publishable Supabase keys may exist in the browser; secret/service-role keys may not.
-- Any public-schema table exposed to the Data API needs intentional grants and RLS.
-- New write policies must enforce ownership, not only `TO authenticated`.
-- Dynamic HTML, URLs and CSS tokens originating outside trusted code must be escaped/validated/allowlisted.
-- Destructive or privileged endpoints must validate method, origin, authentication, active session where relevant, bounded input and failure behavior.
-- `SECURITY DEFINER` functions require an empty/fixed `search_path`, fully-qualified references and explicit EXECUTE grants.
+- Every exposed public-schema table needs intentional grants and RLS.
+- User writes must enforce ownership.
+- Dynamic HTML, URLs and CSS tokens from external/user data must be escaped or allowlisted.
+- Privileged endpoints/functions require bounded input and fail-closed behavior.
+- Service-role access belongs only in trusted server runtimes such as Supabase Edge Functions or Vercel server functions.
 - Do not cache `/api/`, Supabase responses, auth tokens or user-specific data in the service worker.
-- Pin dependencies used at runtime or CI.
+- Pin runtime/CI dependencies where practical.
 
 ## Database changes
 
-- Every production DDL change must have a migration tracked in `supabase/migrations/`.
-- Check for existing data that would violate new constraints before applying them.
-- Run Supabase Security Advisor after DDL changes.
-- Do not remove an index only because it is currently reported as unused on a young product.
+- Every production DDL change must have a matching file in `supabase/migrations/`.
+- Check existing data before adding constraints.
+- Run Supabase Security Advisor after DDL changes and do not knowingly ship new warnings without documented justification.
+- Do not remove indexes solely because a young database reports them unused.
 
-## Product logic
+## Learning engine
 
-- The adaptive plan must be deterministic enough to test and must avoid repeatedly scheduling the same high-score topic when reasonable alternatives exist.
-- Due reviews and weak performance may override rotation because they represent genuine learning priority.
-- Plan generation must be idempotent across retries/tabs/devices.
-- User-entered or PDF-derived content is untrusted input.
-- AI output, if reintroduced later, is untrusted input and cannot directly mutate catalog/state without deterministic validation.
+- The adaptive plan must avoid repeatedly scheduling the same topic when useful alternatives exist.
+- Due reviews and weak performance may override rotation.
+- Plan generation remains idempotent across retries/tabs/devices.
+- ENEM attempts and future diagnostic data should feed study direction rather than become decorative analytics.
 
 ## Cost controls
 
-The stable product must remain useful at R$0 recurring cost. Do not activate paid AI, OCR, push infrastructure, billing or third-party APIs as a hidden dependency. Any paid feature needs an explicit cost/failure analysis first.
+The stable product must remain useful at R$0 recurring cost. Do not silently activate paid AI, OCR, push, billing or third-party APIs. Any paid feature needs explicit cost/failure analysis first.
 
 ## Release gate
 
 A change is not done until:
-- JavaScript syntax checks pass;
-- hardening contracts pass;
-- Chromium desktop/mobile smoke tests pass;
-- degraded Supabase behavior remains usable;
-- security advisor has no new security lint;
+- JavaScript syntax/contracts pass;
+- desktop/mobile Chromium smoke tests pass;
+- degraded backend behavior remains usable;
+- Supabase Security Advisor has no security lint;
 - no browser secret was introduced;
-- visual behavior remains unchanged unless the visual change was explicitly requested.
+- PWA cache version is advanced when application code changes;
+- visual changes match the explicitly approved ENEM direction.

@@ -1,0 +1,82 @@
+name: Validate RUMO ENEM v1
+on:
+  push:
+    branches: [rumo-enem-v1]
+  pull_request:
+    branches: [master]
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check app/enem-core-v1.js
+          node --check app/enem-practice-v1.js
+          node --check app/enem-essay-v1.js
+          node --check app/enem-mock-v1.js
+          node --check app/bootstrap.js
+          node --check sw.js
+      - name: Check ENEM security and product contracts
+        run: |
+          grep -q "RELEASE='10-enem-v1'" app/bootstrap.js
+          grep -q "enem-v1.css" app/bootstrap.js
+          grep -q "enem-core-v1.js" app/bootstrap.js
+          grep -q "enem-practice-v1.js" app/bootstrap.js
+          grep -q "enem-essay-v1.js" app/bootstrap.js
+          grep -q "enem-mock-v1.js" app/bootstrap.js
+          grep -q "functions.invoke('check-enem-answer'" app/enem-practice-v1.js
+          grep -q "functions.invoke('check-enem-answer'" app/enem-mock-v1.js
+          ! grep -q "rumo_check_answer" app/enem-practice-v1.js app/enem-mock-v1.js
+          grep -q "SUPABASE_SERVICE_ROLE_KEY" supabase/functions/check-enem-answer/index.ts
+          grep -q "body_too_large" supabase/functions/check-enem-answer/index.ts
+          grep -q "rumo-static-.*v3\|CACHE_NAME=.*v3" sw.js
+          grep -q "enem-core-v1.js" sw.js
+          grep -q "enem-v1.css" sw.js
+
+  browser-smoke:
+    needs: contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium runner
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save --save-exact playwright@1.62.1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Smoke ENEM desktop and mobile
+        run: |
+          python3 -m http.server 4173 >/tmp/rumo-http.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const viewport of [{width:1366,height:900},{width:390,height:844}]){
+              const page=await browser.newPage({viewport});
+              await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
+              await page.waitForFunction(()=>document.documentElement.dataset.rumoBoot==='ready',{timeout:20000});
+              await page.waitForSelector('[data-tab="enem"]',{timeout:10000});
+              const labels=await page.locator('.sidebar nav .nav').allTextContents();
+              for(const expected of ['Hoje','ENEM','Questões','Redação','Simulados','Concursos','Revisões'])if(!labels.some(x=>x.includes(expected)))throw new Error(`missing nav ${expected}`);
+              await page.locator('[data-tab="questoes"]').click();
+              await page.waitForSelector('#enem-question-stage',{timeout:5000});
+              await page.waitForTimeout(1200);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
+              if(overflow)throw new Error(`horizontal overflow at ${viewport.width}`);
+              await page.locator('[data-tab="redacao"]').click();
+              await page.waitForSelector('#enem-essay-text');
+              await page.locator('#enem-essay-text').fill('Rascunho de teste local.');
+              await page.locator('#enem-save-draft').click();
+            }
+            await browser.close();
+            console.log('ENEM desktop/mobile smoke ok');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE

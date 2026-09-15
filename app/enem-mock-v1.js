@@ -29,7 +29,7 @@
     const root=q('#enem-mock-root'),current=run;if(!root||!current)return;root.innerHTML='<div class="rumo-state"><b>Corrigindo simulado…</b><span>Consolidando seu diagnóstico.</span></div>';
     try{
       const answered=current.questions.filter(item=>current.answers[item.id]);
-      const results=await Promise.all(answered.map(async item=>{const res=await sb.rpc('rumo_check_answer',{p_question_id:item.id,p_selected_answer:current.answers[item.id],p_elapsed_seconds:null});if(res.error)throw res.error;return{item,result:res.data?.[0]}}));
+      const results=await Promise.all(answered.map(async item=>{const res=await sb.functions.invoke('check-enem-answer',{body:{question_id:item.id,selected_answer:current.answers[item.id],elapsed_seconds:null}});if(res.error)throw res.error;return{item,result:res.data}}));
       const correct=results.filter(x=>x.result?.is_correct).length,total=current.questions.length;
       if(!state.user){const local=JSON.parse(localStorage.getItem(guestKey)||'{"attempts":0,"correct":0}');local.attempts=(Number(local.attempts)||0)+answered.length;local.correct=(Number(local.correct)||0)+correct;localStorage.setItem(guestKey,JSON.stringify(local))}
       data.stats.attempts+=answered.length;data.stats.correct+=correct;api.loadStats().catch(()=>{});

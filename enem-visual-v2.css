@@ -1,0 +1,204 @@
+/* RUMO ENEM visual refinement
+   Direction: 21st.dev Bloom Field gradient + Limelight navigation,
+   adapted to RUMO's navy/cobalt/cyan identity and vanilla CSS runtime. */
+
+.rumo-enem-v1{
+  --rumo-navy-950:#07111b;
+  --rumo-navy-900:#0a1623;
+  --rumo-navy-850:#0d1b2a;
+  --rumo-blue:#5c82ff;
+  --rumo-cyan:#43c6ff;
+  --rumo-mint:#69dfc0;
+  --rumo-glow:rgba(92,130,255,.22);
+}
+
+.rumo-enem-v1 .sidebar{
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.018),transparent 18%),
+    linear-gradient(180deg,var(--rumo-navy-950),#08111b 56%,#071019);
+}
+.rumo-enem-v1 .sidebar::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:310px;
+  height:250px;
+  left:-105px;
+  top:-72px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 36% 42%,rgba(67,198,255,.30),transparent 34%),
+    radial-gradient(circle at 67% 52%,rgba(92,130,255,.34),transparent 38%),
+    radial-gradient(circle at 52% 78%,rgba(105,223,192,.11),transparent 39%);
+  filter:blur(28px) saturate(125%);
+  transform:translate3d(0,0,0);
+  animation:rumo-bloom-drift 14s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+.rumo-enem-v1 .sidebar::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,.025),transparent 14%,transparent 86%,rgba(255,255,255,.018));
+}
+
+.rumo-enem-v1 .brand{position:relative;z-index:1}
+.rumo-enem-v1 .brand-copy strong{font-family:"Plus Jakarta Sans",sans-serif;letter-spacing:.16em}
+.rumo-enem-v1 .brand-copy span{color:#8190a5}
+
+.rumo-enem-v1 .sidebar nav{gap:5px;position:relative;z-index:1}
+.rumo-enem-v1 .nav{
+  position:relative;
+  overflow:hidden;
+  min-height:48px;
+  border-radius:12px;
+  padding:11px 13px;
+  color:#9eabbd;
+  transition:color .18s ease,background .18s ease,transform .18s ease,border-color .18s ease;
+  border:1px solid transparent;
+}
+.rumo-enem-v1 .nav::before{
+  content:"";
+  position:absolute;
+  width:76px;
+  height:76px;
+  left:-46px;
+  top:50%;
+  transform:translateY(-50%) scale(.65);
+  opacity:0;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(67,198,255,.55) 0%,rgba(92,130,255,.18) 36%,transparent 70%);
+  filter:blur(7px);
+  transition:opacity .2s ease,transform .24s ease;
+  pointer-events:none;
+}
+.rumo-enem-v1 .nav:hover{
+  color:#e9f2ff;
+  background:rgba(255,255,255,.035);
+  transform:translateX(2px);
+}
+.rumo-enem-v1 .nav.active{
+  color:#fff;
+  background:linear-gradient(90deg,rgba(79,112,255,.15),rgba(67,198,255,.055) 58%,rgba(255,255,255,.025));
+  border-color:rgba(123,157,255,.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.rumo-enem-v1 .nav.active::before{opacity:1;transform:translateY(-50%) scale(1)}
+.rumo-enem-v1 .nav-icon{
+  position:relative;
+  z-index:1;
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  color:#8191a6;
+  transition:color .18s ease,transform .18s ease;
+}
+.rumo-enem-v1 .nav:hover .nav-icon{color:#b9d9ff}
+.rumo-enem-v1 .nav.active .nav-icon{color:#84d8ff;transform:translateX(1px)}
+.rumo-enem-v1 .rumo-iconoir svg{width:20px;height:20px;display:block}
+
+.rumo-enem-v1 .hero-home{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  align-items:center;
+  padding:34px 36px;
+  margin:4px 0 24px;
+  border:1px solid rgba(133,160,210,.13);
+  border-radius:22px;
+  background:
+    radial-gradient(100% 150% at 0% 0%,rgba(67,198,255,.16),transparent 46%),
+    radial-gradient(90% 120% at 88% 8%,rgba(92,130,255,.18),transparent 50%),
+    radial-gradient(70% 85% at 55% 110%,rgba(105,223,192,.075),transparent 50%),
+    linear-gradient(135deg,#0b1824 0%,#0c1723 46%,#0a1420 100%);
+  box-shadow:0 24px 70px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.035);
+}
+.rumo-enem-v1 .hero-home::before,
+.rumo-enem-v1 .hero-home::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  border-radius:50%;
+  pointer-events:none;
+  filter:blur(36px) saturate(130%);
+  will-change:transform;
+}
+.rumo-enem-v1 .hero-home::before{
+  width:310px;height:235px;right:6%;top:-110px;
+  background:radial-gradient(circle at 35% 55%,rgba(80,211,255,.34),transparent 34%),radial-gradient(circle at 68% 48%,rgba(83,105,255,.34),transparent 42%);
+  animation:rumo-bloom-float 12s ease-in-out infinite alternate;
+}
+.rumo-enem-v1 .hero-home::after{
+  width:250px;height:210px;left:16%;bottom:-155px;
+  background:radial-gradient(circle,rgba(105,223,192,.17),transparent 62%);
+  animation:rumo-bloom-float-secondary 16s ease-in-out infinite alternate;
+}
+.rumo-enem-v1 .hero-home .eyebrow{color:#aab9ca}
+.rumo-enem-v1 .hero-home h1{color:#f7fbff}
+.rumo-enem-v1 .hero-home h1 em{
+  background:linear-gradient(100deg,#8ae3ff 0%,#75a2ff 45%,#9b91ff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.rumo-enem-v1 .hero-home p{color:#a6b5c5;max-width:700px}
+
+.rumo-enem-v1 .primary{
+  background:linear-gradient(108deg,#4c72f4 0%,#557fff 38%,#35b8e9 100%);
+  border:1px solid rgba(176,215,255,.16);
+  box-shadow:0 10px 28px rgba(61,111,231,.18),inset 0 1px 0 rgba(255,255,255,.18);
+  transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;
+}
+.rumo-enem-v1 .primary:hover{filter:saturate(108%) brightness(1.05);box-shadow:0 13px 34px rgba(61,111,231,.24),inset 0 1px 0 rgba(255,255,255,.20)}
+.rumo-enem-v1 .primary:active{transform:translateY(0) scale(.985)}
+
+.rumo-enem-v1 .rumo-enem-home{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(110deg,color-mix(in srgb,var(--surface) 94%,#5c82ff),var(--surface));
+  border-color:color-mix(in srgb,var(--line) 72%,#5c82ff);
+}
+.rumo-enem-v1 .rumo-enem-home::after{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(100,199,255,.55),rgba(92,130,255,.46),transparent);
+  pointer-events:none;
+}
+
+.rumo-enem-v1 .rumo-area-row{transition:background .16s ease,padding-left .16s ease,border-color .16s ease}
+.rumo-enem-v1 .rumo-area-row:hover{padding-left:12px;border-bottom-color:color-mix(in srgb,var(--line) 66%,var(--rumo-blue));background:linear-gradient(90deg,color-mix(in srgb,var(--rumo-blue) 7%,transparent),transparent 62%)}
+.rumo-enem-v1 .rumo-area-index{font-variant-numeric:tabular-nums;color:#7f93ab}
+
+.rumo-enem-v1 #menu.rumo-menu-icon{padding:0;place-items:center}
+.rumo-enem-v1 #menu.rumo-menu-icon svg{width:22px;height:22px}
+
+@keyframes rumo-bloom-drift{
+  from{transform:translate3d(-4px,-2px,0) scale(.98)}
+  to{transform:translate3d(18px,12px,0) scale(1.05)}
+}
+@keyframes rumo-bloom-float{
+  from{transform:translate3d(-12px,-6px,0) scale(.96)}
+  to{transform:translate3d(22px,18px,0) scale(1.06)}
+}
+@keyframes rumo-bloom-float-secondary{
+  from{transform:translate3d(0,0,0) scale(.94)}
+  to{transform:translate3d(-18px,-10px,0) scale(1.05)}
+}
+
+@media(max-width:700px){
+  .rumo-enem-v1 .hero-home{padding:26px 20px;border-radius:18px;align-items:flex-start}
+  .rumo-enem-v1 .hero-home::before{width:230px;height:180px;right:-70px;top:-75px;filter:blur(30px)}
+  .rumo-enem-v1 .sidebar::before{width:260px;height:210px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .rumo-enem-v1 .sidebar::before,
+  .rumo-enem-v1 .hero-home::before,
+  .rumo-enem-v1 .hero-home::after{animation:none!important}
+  .rumo-enem-v1 .nav,.rumo-enem-v1 .nav::before,.rumo-enem-v1 .nav-icon,.rumo-enem-v1 .primary{transition:none!important}
+}

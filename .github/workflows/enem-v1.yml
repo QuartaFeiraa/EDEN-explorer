@@ -77,16 +77,24 @@ jobs:
               if(iconSystem!=='iconoir')throw new Error(`wrong icon system: ${iconSystem}`);
               const iconCount=await page.locator('.sidebar nav .nav .nav-icon svg').count();
               if(iconCount<7)throw new Error(`missing SVG navigation icons: ${iconCount}`);
-              await page.locator('[data-tab="questoes"]').click();
+              const go=async id=>{
+                if(viewport.width<=760){
+                  await page.locator('#menu').click();
+                  await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'));
+                }
+                await page.locator(`[data-tab="${id}"]`).click();
+              };
+              await go('questoes');
               await page.waitForSelector('[data-enem-answer]',{timeout:15000});
               await page.locator('[data-enem-answer]').first().click();
               await page.waitForSelector('.rumo-feedback.success, .rumo-feedback.failure',{timeout:15000});
               const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
               if(overflow)throw new Error(`horizontal overflow at ${viewport.width}`);
-              await page.locator('[data-tab="redacao"]').click();
+              await go('redacao');
               await page.waitForSelector('#enem-essay-text');
               await page.locator('#enem-essay-text').fill('Rascunho de teste local.');
               await page.locator('#enem-save-draft').click();
+              await page.close();
             }
             await browser.close();
             console.log('ENEM desktop/mobile visual smoke ok');

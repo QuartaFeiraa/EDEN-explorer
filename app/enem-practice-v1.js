@@ -41,9 +41,9 @@
     const feedback=q('#enem-feedback');if(feedback)feedback.innerHTML='<div class="rumo-feedback pending">Corrigindo…</div>';
     try{
       const elapsed=Math.min(21600,Math.max(0,Math.round((Date.now()-startedAt)/1000)));
-      const res=await sb.rpc('rumo_check_answer',{p_question_id:item.id,p_selected_answer:selected,p_elapsed_seconds:elapsed});if(res.error)throw res.error;
-      const result=res.data?.[0];if(!result)throw new Error('empty correction');
-      const correct=!!result.is_correct;
+      const res=await sb.functions.invoke('check-enem-answer',{body:{question_id:item.id,selected_answer:selected,elapsed_seconds:elapsed}});if(res.error)throw res.error;
+      const result=res.data;if(!result||typeof result.is_correct!=='boolean')throw new Error('empty correction');
+      const correct=result.is_correct;
       buttons.forEach(b=>{if(b.dataset.enemAnswer===result.correct_answer)b.classList.add('correct');else if(b.dataset.enemAnswer===selected&&!correct)b.classList.add('wrong')});
       if(!state.user){const local=JSON.parse(localStorage.getItem(guestKey)||'{"attempts":0,"correct":0}');local.attempts=(Number(local.attempts)||0)+1;if(correct)local.correct=(Number(local.correct)||0)+1;localStorage.setItem(guestKey,JSON.stringify(local))}
       api.bump(correct);

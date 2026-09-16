@@ -1,0 +1,63 @@
+name: RUMO typography v6 audit
+on:
+  push:
+    branches: [rumo-enem-v1]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save --save-exact playwright@1.62.1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Audit balanced typography on every main tab
+        run: |
+          python3 -m http.server 4173 >/tmp/rumo-http.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const px=async loc=>parseFloat(await loc.evaluate(el=>getComputedStyle(el).fontSize));
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const viewport of [{width:1440,height:900},{width:1366,height:768},{width:390,height:844}]){
+              const page=await browser.newPage({viewport});
+              await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
+              await page.waitForFunction(()=>document.documentElement.dataset.rumoBoot==='ready',{timeout:20000});
+              if(await page.evaluate(()=>document.documentElement.dataset.rumoVersion)!=='10-enem-v4')throw new Error('wrong release');
+              const go=async id=>{
+                if(viewport.width<=780){const open=await page.locator('.sidebar').evaluate(el=>el.classList.contains('open'));if(!open){await page.locator('#menu').click();await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'))}}
+                await page.locator(`[data-tab="${id}"]`).click();
+                await page.waitForFunction(id=>document.querySelector(`#${id}`)?.classList.contains('active'),id);
+              };
+              for(const id of ['hoje','enem','questoes','redacao','simulados','concursos','revisoes']){
+                await go(id);await page.waitForTimeout(80);
+                const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
+                if(overflow)throw new Error(`overflow ${id} ${viewport.width}`);
+                if(viewport.width>780){const h=page.locator(`#${id} h1`).first();if(await h.count()){const size=await px(h);if(size<32||size>40.5)throw new Error(`unbalanced h1 ${id}: ${size}px`)}}
+              }
+              await go('questoes');
+              await page.waitForSelector('[data-enem-answer]',{timeout:15000});
+              if(viewport.width>780){
+                for(const [selector,min] of [['#questoes .rumo-filter-panel label',13],['#questoes .rumo-filter-panel select',14.5],['#questoes .rumo-question-meta span',12.5],['#questoes [data-enem-answer] span',15]]){
+                  const loc=page.locator(selector).first();if(await loc.count()&&(await px(loc))<min)throw new Error(`small ${selector}: ${await px(loc)}px`);
+                }
+              }
+              await go('redacao');
+              await page.waitForSelector('#enem-essay-text',{timeout:15000});
+              if(viewport.width>780){
+                for(const [selector,min] of [['#redacao .rumo-essay-list button b',15],['#redacao .rumo-essay-list button span',13],['#redacao .rumo-editor-foot',13],['#redacao .rumo-competencies b',13.5],['#redacao .rumo-competencies span',13],['#enem-essay-text',16]]){
+                  const loc=page.locator(selector).first();if(await loc.count()&&(await px(loc))<min)throw new Error(`small ${selector}: ${await px(loc)}px`);
+                }
+              }
+              await page.close();
+            }
+            await browser.close();
+            console.log('Balanced typography audit passed');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE

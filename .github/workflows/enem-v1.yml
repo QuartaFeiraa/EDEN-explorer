@@ -55,7 +55,6 @@ jobs:
           grep -q "rumoIconSystem='iconoir'" app/enem-visual-v2.js
           grep -q "rumoShell='nexo-v3'" app/rumo-shell-v3.js
           grep -q "eden-mark-v3" rumo-shell-v3.css app/rumo-shell-v3.js
-          grep -q "20260916021000_enem_covering_indexes_v1" docs/ACTIVE-SURFACE.md || true
           test -f supabase/migrations/20260916021000_enem_covering_indexes_v1.sql
           test -f supabase/migrations/20260916021200_enem_content_integrity_v1.sql
 
@@ -103,8 +102,8 @@ jobs:
                 if(viewport.width>780&&audit.h&&(audit.h<32||audit.h>40.5))throw new Error(`heading out of scale ${id}: ${audit.h}`);
               }
               await go('enem');
-              await page.waitForFunction(()=>window.RUMO_ENEM?.data?.questionCount>=32,{timeout:15000});
-              const content=await page.evaluate(()=>({questions:window.RUMO_ENEM.data.questionCount,essays:window.RUMO_ENEM.data.essayTopics?.length||0}));
+              await page.waitForFunction(()=>window.RUMO_ENEM?.data?.questionCount>=32&&window.RUMO_ENEM?.data?.essays?.length>=8,{timeout:15000});
+              const content=await page.evaluate(()=>({questions:window.RUMO_ENEM.data.questionCount,essays:window.RUMO_ENEM.data.essays.length}));
               if(content.questions<32||content.essays<8)throw new Error(`starter content incomplete: ${JSON.stringify(content)}`);
               await go('questoes');
               await page.waitForSelector('[data-enem-answer]',{timeout:15000});

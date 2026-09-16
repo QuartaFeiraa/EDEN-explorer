@@ -3,9 +3,13 @@
   const api=window.RUMO_ENEM;if(!api)return;
   const {data,q,qa,sb,state,escapeHTML,shell}=api;
   let questions=[],index=0,startedAt=0;
-  const guestKey='rumo-enem-guest-stats';
+  const guestKey='rumo-enem-guest-stats',CORRECTION_TIMEOUT_MS=10000;
   const shuffle=list=>[...list].sort(()=>Math.random()-.5);
   const options=raw=>Array.isArray(raw)?raw:[];
+  const invokeCorrection=body=>Promise.race([
+    sb.functions.invoke('check-enem-answer',{body}),
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('correction_timeout')),CORRECTION_TIMEOUT_MS))
+  ]);
 
   function areaName(id){return data.areas.find(a=>a.id===id)?.short_name||'ENEM'}
   function topicName(id){return data.topics.find(t=>t.id===id)?.name||''}
@@ -41,7 +45,7 @@
     const feedback=q('#enem-feedback');if(feedback)feedback.innerHTML='<div class="rumo-feedback pending">Corrigindo…</div>';
     try{
       const elapsed=Math.min(21600,Math.max(0,Math.round((Date.now()-startedAt)/1000)));
-      const res=await sb.functions.invoke('check-enem-answer',{body:{question_id:item.id,selected_answer:selected,elapsed_seconds:elapsed}});if(res.error)throw res.error;
+      const res=await invokeCorrection({question_id:item.id,selected_answer:selected,elapsed_seconds:elapsed});if(res.error)throw res.error;
       const result=res.data;if(!result||typeof result.is_correct!=='boolean')throw new Error('empty correction');
       const correct=result.is_correct;
       buttons.forEach(b=>{if(b.dataset.enemAnswer===result.correct_answer)b.classList.add('correct');else if(b.dataset.enemAnswer===selected&&!correct)b.classList.add('wrong')});
@@ -49,7 +53,7 @@
       api.bump(correct);
       if(feedback)feedback.innerHTML=`<div class="rumo-feedback ${correct?'success':'failure'}"><b>${correct?'Acertou.':'Ainda não.'}</b><span>${escapeHTML(result.explanation||'')}</span><button class="secondary" id="enem-next-question">Próxima questão →</button></div>`;
       q('#enem-next-question')?.addEventListener('click',()=>{index=(index+1)%questions.length;renderQuestion()});
-    }catch(err){console.warn('ENEM correction failed',err);buttons.forEach(b=>b.disabled=false);if(feedback)feedback.innerHTML='<div class="rumo-feedback failure"><b>Não consegui corrigir agora.</b><span>A resposta não foi registrada.</span></div>'}
+    }catch(err){console.warn('ENEM correction failed',err);buttons.forEach(b=>b.disabled=false);if(feedback)feedback.innerHTML='<div class="rumo-feedback failure"><b>Não consegui corrigir agora.</b><span>Sua resposta não foi registrada. Você pode tentar novamente.</span></div>'}
   }
   function bind(){
     const area=q('#enem-area-filter'),topic=q('#enem-topic-filter'),fresh=q('#enem-new-list');if(!area||!topic||!fresh)return;

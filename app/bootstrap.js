@@ -13,6 +13,7 @@
   addCss('./enem-visual-v2.css');
   addCss('./rumo-shell-v3.css');
   addCss('./rumo-polish-v4.css');
+  addCss('./rumo-readability-v4b.css');
 
   async function boot(){
     try{

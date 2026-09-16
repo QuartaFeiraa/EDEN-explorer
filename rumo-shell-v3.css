@@ -1,0 +1,225 @@
+/* RUMO visual v3 — dense EDEN/NEXO-derived application shell.
+   Uses the existing RUMO visual system and real product data; no decorative dashboard filler. */
+
+body.rumo-enem-v1{
+  --rumo-shell:#0a121a;
+  --rumo-shell-2:#0d1721;
+  --rumo-panel:#182025;
+  --rumo-panel-2:#1c252b;
+  --rumo-line:#2b373f;
+  --rumo-text:#f4f7f9;
+  --rumo-muted:#9aa8b3;
+  --rumo-accent:#6f92ff;
+  --rumo-cyan:#57c7ed;
+  --rumo-sidebar-w:232px;
+  font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+body.rumo-enem-v1 .sidebar{
+  width:var(--rumo-sidebar-w);
+  padding:18px 12px 14px;
+  background:linear-gradient(180deg,#09131d 0%,#08111a 58%,#071019 100%);
+  border-right:1px solid rgba(151,180,204,.1);
+}
+body.rumo-enem-v1 main{margin-left:var(--rumo-sidebar-w)}
+body.rumo-enem-v1 .sidebar::before{
+  width:220px;height:180px;left:-92px;top:-80px;opacity:.48;filter:blur(34px) saturate(110%);
+}
+body.rumo-enem-v1 .brand{gap:10px;padding:3px 8px 18px;margin-bottom:2px}
+body.rumo-enem-v1 .brand-icon{width:38px;height:38px}
+body.rumo-enem-v1 .brand-copy strong{font:800 15px/1.1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em}
+body.rumo-enem-v1 .brand-copy span{font-size:10px;margin-top:4px;color:#7f8f9c}
+body.rumo-enem-v1 .sidebar nav{gap:3px}
+body.rumo-enem-v1 .rumo-nav-group-v3{
+  margin:13px 10px 5px;
+  color:#5f7280;
+  font-size:8px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  user-select:none;
+}
+body.rumo-enem-v1 .nav{
+  min-height:40px;
+  padding:8px 10px;
+  gap:10px;
+  border-radius:10px;
+  font-size:12.5px;
+  font-weight:600;
+}
+body.rumo-enem-v1 .nav::before{width:62px;height:62px;left:-44px;filter:blur(8px)}
+body.rumo-enem-v1 .nav:hover{transform:none;background:rgba(255,255,255,.03)}
+body.rumo-enem-v1 .nav.active{
+  background:linear-gradient(90deg,rgba(89,125,255,.15),rgba(64,188,226,.045) 72%,transparent);
+  border-color:rgba(116,151,255,.13);
+}
+body.rumo-enem-v1 .nav-icon{width:20px;height:20px}
+body.rumo-enem-v1 .rumo-iconoir svg{width:18px;height:18px}
+
+body.rumo-enem-v1 .eden-footer{
+  margin:auto 4px 0;
+  padding:15px 7px 2px;
+  border-top:1px solid rgba(132,158,178,.11);
+  text-align:left;
+  letter-spacing:0;
+  color:#758797;
+}
+body.rumo-enem-v1 .eden-family-v3{display:flex;align-items:center;gap:8px;min-height:24px}
+body.rumo-enem-v1 .eden-mark-v3{
+  width:20px;height:20px;display:block;flex:0 0 auto;
+  background:linear-gradient(135deg,#8bdeff 0%,#7296ff 48%,#99a3ff 100%);
+  -webkit-mask:url("data:image/png;base64,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") center/contain no-repeat;
+  mask:url("data:image/png;base64,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") center/contain no-repeat;
+}
+body.rumo-enem-v1 .eden-word-v3{font:650 13px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:-.015em;color:#aab8c3}
+body.rumo-enem-v1 .eden-links-v3{display:flex;gap:10px;margin:7px 0 0 28px}
+body.rumo-enem-v1 .eden-links-v3 a{font-size:9px;line-height:1;color:#607281;text-decoration:none;letter-spacing:0}
+body.rumo-enem-v1 .eden-links-v3 a:hover{color:#9fb6c7}
+
+body.rumo-enem-v1 .topbar{
+  height:58px;
+  padding:0 28px;
+  justify-content:space-between;
+  background:color-mix(in srgb,var(--bg) 93%,transparent);
+  border-bottom-color:color-mix(in srgb,var(--line) 78%,transparent);
+}
+body.rumo-enem-v1 .rumo-top-context-v3{display:flex;align-items:center;gap:9px;min-width:0}
+body.rumo-enem-v1 .rumo-top-context-v3 small{font-size:9px;font-weight:800;letter-spacing:.15em;color:#748693}
+body.rumo-enem-v1 .rumo-top-context-v3 i{width:1px;height:13px;background:var(--line);display:block}
+body.rumo-enem-v1 .rumo-top-context-v3 strong{font-size:12px;font-weight:700;color:var(--text)}
+body.rumo-enem-v1 .top-actions{gap:8px}
+body.rumo-enem-v1 .icon-btn{width:36px;height:36px;border-radius:10px}
+body.rumo-enem-v1 .user{width:36px;height:36px}
+
+body.rumo-enem-v1 .page{max-width:1180px;padding:24px 28px 50px}
+body.rumo-enem-v1 .rumo-enem-page{max-width:1180px;padding-top:22px}
+body.rumo-enem-v1 .rumo-section-head{margin-bottom:14px}
+body.rumo-enem-v1 #enem .rumo-section-head{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(250px,.72fr);
+  align-items:stretch;
+  gap:12px;
+}
+body.rumo-enem-v1 #enem .rumo-section-head>.rumo-enem-intro-v3{
+  position:relative;overflow:hidden;
+  min-height:220px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  padding:25px 27px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:
+    radial-gradient(88% 120% at 3% 0%,rgba(70,184,229,.10),transparent 53%),
+    linear-gradient(135deg,color-mix(in srgb,var(--surface) 97%,#547fff),var(--surface));
+}
+body.rumo-enem-v1 #enem .rumo-section-head>.rumo-enem-intro-v3::after{
+  content:"";position:absolute;left:0;top:0;width:45%;height:2px;
+  background:linear-gradient(90deg,#55c9ed,#6e8fff,transparent);
+}
+body.rumo-enem-v1 #enem .rumo-section-head h1{
+  font:750 clamp(29px,3vw,39px)/1.08 "Plus Jakarta Sans",sans-serif;
+  letter-spacing:-.04em;
+  margin:8px 0 9px;
+  max-width:660px;
+}
+body.rumo-enem-v1 #enem .rumo-section-head h1 em{
+  background:linear-gradient(100deg,#83dfff 0%,#789cff 55%,#a09bff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+body.rumo-enem-v1 #enem .rumo-section-head p{font-size:12.5px;line-height:1.55;max-width:620px;color:var(--muted)}
+body.rumo-enem-v1 .rumo-enem-actions-v3{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+body.rumo-enem-v1 .rumo-enem-actions-v3 button{min-height:38px;padding:9px 13px;border-radius:10px;font-size:11px}
+body.rumo-enem-v1 .rumo-enem-snapshot-v3{
+  border:1px solid var(--line);border-radius:17px;background:var(--surface);padding:18px;
+  display:flex;flex-direction:column;min-width:0;
+}
+body.rumo-enem-v1 .rumo-enem-snapshot-v3>small{font-size:8px;letter-spacing:.14em;font-weight:800;color:var(--muted)}
+body.rumo-enem-v1 .rumo-snapshot-grid-v3{display:grid;grid-template-columns:1fr 1fr;margin:12px 0 13px;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+body.rumo-enem-v1 .rumo-snapshot-grid-v3 div{min-width:0;padding:11px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:3px}
+body.rumo-enem-v1 .rumo-snapshot-grid-v3 b{font-size:19px;font-variant-numeric:tabular-nums}
+body.rumo-enem-v1 .rumo-snapshot-grid-v3 span{font-size:8.5px;color:var(--muted);line-height:1.25}
+body.rumo-enem-v1 .rumo-enem-snapshot-v3 .rumo-source-link{margin-top:auto;align-self:flex-start;font-size:10px;padding:5px 0}
+
+body.rumo-enem-v1 #enem-overview{display:block}
+body.rumo-enem-v1 .rumo-enem-content-v3{display:grid;grid-template-columns:minmax(0,1fr) 272px;gap:12px;align-items:start}
+body.rumo-enem-v1 .rumo-enem-main-v3,
+body.rumo-enem-v1 .rumo-enem-aside-v3{min-width:0}
+body.rumo-enem-v1 .rumo-overview-label-v3{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:3px 2px 10px}
+body.rumo-enem-v1 .rumo-overview-label-v3 small{display:block;font-size:8px;font-weight:800;letter-spacing:.15em;color:var(--muted);margin-bottom:4px}
+body.rumo-enem-v1 .rumo-overview-label-v3 h2{font:700 17px/1.2 "Plus Jakarta Sans",sans-serif;margin:0}
+body.rumo-enem-v1 .rumo-overview-label-v3 span{font-size:9px;color:var(--muted)}
+body.rumo-enem-v1 .rumo-area-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+body.rumo-enem-v1 .rumo-area-row{
+  min-height:88px;
+  grid-template-columns:28px minmax(0,1fr) auto;
+  gap:10px;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--surface);
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+body.rumo-enem-v1 .rumo-area-row:hover{
+  padding-left:14px;transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--line) 56%,var(--rumo-accent));
+  background:linear-gradient(110deg,color-mix(in srgb,var(--rumo-accent) 6%,var(--surface)),var(--surface));
+}
+body.rumo-enem-v1 .rumo-area-row[data-enem-area="enem-redacao"]{grid-column:1/-1;min-height:72px}
+body.rumo-enem-v1 .rumo-area-index{font-size:9px;align-self:start;padding-top:3px;color:#7592aa}
+body.rumo-enem-v1 .rumo-area-copy b{font-size:13px}
+body.rumo-enem-v1 .rumo-area-copy small{font-size:9px;line-height:1.35;margin-top:2px}
+body.rumo-enem-v1 .rumo-area-meta{font-size:8.5px;white-space:nowrap;align-self:center}
+body.rumo-enem-v1 .rumo-area-row>span:last-child{display:none}
+
+body.rumo-enem-v1 .rumo-enem-aside-v3{display:grid;gap:8px}
+body.rumo-enem-v1 .rumo-axis{
+  margin:0;padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--surface);
+}
+body.rumo-enem-v1 .rumo-axis>small{font-size:8px;margin-bottom:8px}
+body.rumo-enem-v1 .rumo-axis>div{display:grid;grid-template-columns:1fr;gap:0}
+body.rumo-enem-v1 .rumo-axis span{min-height:38px;border-top:1px solid var(--line);padding:7px 0;font-size:9px;line-height:1.3}
+body.rumo-enem-v1 .rumo-axis span:first-child{border-top:0}
+body.rumo-enem-v1 .rumo-axis span b{width:23px;height:23px;flex:0 0 auto;border-radius:7px}
+body.rumo-enem-v1 .rumo-enem-footnote{
+  display:grid;gap:5px;margin:0;padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--surface) 97%,#5a86ff);font-size:9px;line-height:1.4;
+}
+body.rumo-enem-v1 .rumo-enem-footnote b{font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+
+body.rumo-enem-v1 .objective-strip{border-radius:15px;padding:13px 16px;margin-bottom:12px;box-shadow:none}
+body.rumo-enem-v1 .dashboard-grid{gap:12px}
+body.rumo-enem-v1 .card{padding:18px;border-radius:16px;box-shadow:none}
+body.rumo-enem-v1 .hero-home{padding:24px 26px;margin-bottom:12px;border-radius:17px;box-shadow:none}
+body.rumo-enem-v1 .rumo-enem-home{padding:15px 17px;margin-bottom:12px;border-radius:15px}
+body.rumo-enem-v1 .rumo-home-copy b{font-size:19px}
+body.rumo-enem-v1 .rumo-home-metrics b{font-size:17px}
+
+@media(max-width:980px){
+  body.rumo-enem-v1 .rumo-enem-content-v3{grid-template-columns:1fr}
+  body.rumo-enem-v1 .rumo-enem-aside-v3{grid-template-columns:1fr 1fr}
+  body.rumo-enem-v1 #enem .rumo-section-head{grid-template-columns:1fr}
+  body.rumo-enem-v1 #enem .rumo-section-head>.rumo-enem-intro-v3{min-height:190px}
+}
+@media(max-width:780px){
+  body.rumo-enem-v1 .sidebar{width:min(276px,88vw);padding-top:16px}
+  body.rumo-enem-v1 main{margin-left:0}
+  body.rumo-enem-v1 .topbar{height:58px;padding:0 14px}
+  body.rumo-enem-v1 .rumo-top-context-v3{display:none}
+  body.rumo-enem-v1 .page,body.rumo-enem-v1 .rumo-enem-page{padding:18px 14px 42px}
+  body.rumo-enem-v1 .mobile-logo{font-family:"Plus Jakarta Sans",sans-serif;font-size:12px}
+  body.rumo-enem-v1 .rumo-area-list{grid-template-columns:1fr}
+  body.rumo-enem-v1 .rumo-area-row[data-enem-area="enem-redacao"]{grid-column:auto}
+  body.rumo-enem-v1 .rumo-enem-aside-v3{grid-template-columns:1fr}
+  body.rumo-enem-v1 .rumo-enem-actions-v3{width:100%}
+  body.rumo-enem-v1 .rumo-enem-actions-v3 button{flex:1}
+  body.rumo-enem-v1 #enem .rumo-section-head>.rumo-enem-intro-v3{padding:21px 19px;min-height:auto}
+  body.rumo-enem-v1 #enem .rumo-section-head h1{font-size:30px}
+}
+@media(max-width:480px){
+  body.rumo-enem-v1 .rumo-snapshot-grid-v3{grid-template-columns:1fr 1fr}
+  body.rumo-enem-v1 .rumo-area-row{min-height:82px}
+  body.rumo-enem-v1 .rumo-area-meta{display:none}
+  body.rumo-enem-v1 .rumo-enem-actions-v3{display:grid;grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  body.rumo-enem-v1 .rumo-area-row{transition:none!important}
+}

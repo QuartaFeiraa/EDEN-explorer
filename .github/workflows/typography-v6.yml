@@ -1,7 +1,7 @@
 name: RUMO typography v6 audit
 on:
   push:
-    branches: [rumo-enem-v1]
+    branches: [rumo-enem-v1, rumo-enem-v1-hardening-20260915]
 
 jobs:
   audit:
@@ -29,14 +29,14 @@ jobs:
               const page=await browser.newPage({viewport});
               await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
               await page.waitForFunction(()=>document.documentElement.dataset.rumoBoot==='ready',{timeout:20000});
-              if(await page.evaluate(()=>document.documentElement.dataset.rumoVersion)!=='10-enem-v4')throw new Error('wrong release');
+              if(await page.evaluate(()=>document.documentElement.dataset.rumoVersion)!=='10-enem-v5')throw new Error('wrong release');
               const go=async id=>{
                 if(viewport.width<=780){const open=await page.locator('.sidebar').evaluate(el=>el.classList.contains('open'));if(!open){await page.locator('#menu').click();await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'))}}
                 await page.locator(`[data-tab="${id}"]`).click();
                 await page.waitForFunction(id=>document.querySelector(`#${id}`)?.classList.contains('active'),id);
               };
               for(const id of ['hoje','enem','questoes','redacao','simulados','concursos','revisoes']){
-                await go(id);await page.waitForTimeout(80);
+                await go(id);await page.waitForTimeout(60);
                 const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
                 if(overflow)throw new Error(`overflow ${id} ${viewport.width}`);
                 if(viewport.width>780){const h=page.locator(`#${id} h1`).first();if(await h.count()){const size=await px(h);if(size<32||size>40.5)throw new Error(`unbalanced h1 ${id}: ${size}px`)}}

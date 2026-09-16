@@ -28,6 +28,7 @@ jobs:
         run: |
           grep -q "RELEASE='10-enem-v3'" app/bootstrap.js
           grep -q "rumo-polish-v4.css" app/bootstrap.js
+          grep -q "rumo-readability-v4b.css" app/bootstrap.js
           grep -q "account-ux-v4.js" app/bootstrap.js
           grep -q "enem-v1.css" app/bootstrap.js
           grep -q "enem-visual-v2.css" app/bootstrap.js
@@ -41,8 +42,9 @@ jobs:
           ! grep -q "rumo_check_answer" app/enem-practice-v1.js app/enem-mock-v1.js
           grep -q "SUPABASE_SERVICE_ROLE_KEY" supabase/functions/check-enem-answer/index.ts
           grep -q "body_too_large" supabase/functions/check-enem-answer/index.ts
-          grep -q "rumo-static-.*v6\|CACHE_NAME=.*v6" sw.js
+          grep -q "rumo-static-.*v7\|CACHE_NAME=.*v7" sw.js
           grep -q "rumo-polish-v4.css" sw.js
+          grep -q "rumo-readability-v4b.css" sw.js
           grep -q "account-ux-v4.js" sw.js
           grep -q "prefers-reduced-motion" rumo-polish-v4.css
           grep -q "rumoIconSystem='iconoir'" app/enem-visual-v2.js

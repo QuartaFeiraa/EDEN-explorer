@@ -3,9 +3,13 @@
   const api=window.RUMO_ENEM;if(!api)return;
   const {data,q,qa,sb,state,escapeHTML,pct}=api;
   let run=null;
-  const guestKey='rumo-enem-guest-stats';
+  const guestKey='rumo-enem-guest-stats',CORRECTION_TIMEOUT_MS=10000;
   const shuffle=list=>[...list].sort(()=>Math.random()-.5);
   const opts=raw=>Array.isArray(raw)?raw:[];
+  const invokeCorrection=body=>Promise.race([
+    sb.functions.invoke('check-enem-answer',{body}),
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('correction_timeout')),CORRECTION_TIMEOUT_MS))
+  ]);
   function setup(){
     const root=q('#enem-mock-root');if(!root||run)return;
     root.innerHTML=`<div class="rumo-mock-setup"><div><small>BLOCO RÁPIDO</small><h2>Monte um simulado agora.</h2><p>Sem correção durante a prova. O diagnóstico aparece apenas no final.</p></div><div class="rumo-mock-controls"><label>Questões<select id="enem-mock-size"><option value="4">4 questões</option><option value="8" selected>8 questões</option><option value="12">12 questões</option></select></label><label>Área<select id="enem-mock-area"><option value="">Todas</option>${data.areas.filter(a=>a.id!=='enem-redacao').map(a=>`<option value="${escapeHTML(a.id)}">${escapeHTML(a.short_name||a.name)}</option>`).join('')}</select></label><button class="primary" id="enem-start-mock">Iniciar simulado</button></div></div>`;
@@ -29,14 +33,14 @@
     const root=q('#enem-mock-root'),current=run;if(!root||!current)return;root.innerHTML='<div class="rumo-state"><b>Corrigindo simulado…</b><span>Consolidando seu diagnóstico.</span></div>';
     try{
       const answered=current.questions.filter(item=>current.answers[item.id]);
-      const results=await Promise.all(answered.map(async item=>{const res=await sb.functions.invoke('check-enem-answer',{body:{question_id:item.id,selected_answer:current.answers[item.id],elapsed_seconds:null}});if(res.error)throw res.error;return{item,result:res.data}}));
+      const results=await Promise.all(answered.map(async item=>{const res=await invokeCorrection({question_id:item.id,selected_answer:current.answers[item.id],elapsed_seconds:null});if(res.error)throw res.error;return{item,result:res.data}}));
       const correct=results.filter(x=>x.result?.is_correct).length,total=current.questions.length;
       if(!state.user){const local=JSON.parse(localStorage.getItem(guestKey)||'{"attempts":0,"correct":0}');local.attempts=(Number(local.attempts)||0)+answered.length;local.correct=(Number(local.correct)||0)+correct;localStorage.setItem(guestKey,JSON.stringify(local))}
       data.stats.attempts+=answered.length;data.stats.correct+=correct;api.loadStats().catch(()=>{});
       const byArea={};for(const x of results){const id=x.item.area_id;byArea[id]??={total:0,correct:0};byArea[id].total++;if(x.result?.is_correct)byArea[id].correct++}
       run=null;
       root.innerHTML=`<div class="rumo-mock-result"><small>RESULTADO</small><div class="rumo-score"><b>${correct}/${total}</b><span>${pct(correct,total)}% de acerto</span></div><div class="rumo-result-areas">${Object.entries(byArea).map(([id,s])=>`<div><span>${escapeHTML(data.areas.find(a=>a.id===id)?.short_name||id)}</span><b>${s.correct}/${s.total}</b></div>`).join('')}</div><p>${pct(correct,total)>=70?'Boa base. Use os erros para definir a próxima revisão.':'O resultado já mostra onde concentrar sua próxima rodada de estudos.'}</p><button class="primary" id="mock-again">Novo simulado</button></div>`;q('#mock-again').onclick=setup;
-    }catch(err){console.warn('Mock correction failed',err);run=null;root.innerHTML='<div class="rumo-state error"><b>Não consegui concluir a correção.</b><span>Nenhum resultado parcial será mostrado como definitivo.</span><button class="secondary" id="mock-retry-home">Voltar</button></div>';q('#mock-retry-home').onclick=setup}
+    }catch(err){console.warn('Mock correction failed',err);run=null;root.innerHTML='<div class="rumo-state error"><b>Não consegui concluir a correção.</b><span>Nenhum resultado parcial será mostrado como definitivo. Tente novamente em instantes.</span><button class="secondary" id="mock-retry-home">Voltar</button></div>';q('#mock-retry-home').onclick=setup}
   }
   document.addEventListener('rumo:enem-ready',setup);document.addEventListener('rumo:tab',e=>{if(e.detail?.id==='simulados'&&!run)setup()});if(data.areas?.length)setup();
   window.RUMO_ENEM_MOCK={setup,start};

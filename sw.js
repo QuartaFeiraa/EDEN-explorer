@@ -1,11 +1,11 @@
 'use strict';
 
 const CACHE_PREFIX='rumo-static-';
-const CACHE_NAME=`${CACHE_PREFIX}v5`;
+const CACHE_NAME=`${CACHE_PREFIX}v6`;
 const PRECACHE=[
   './','./index.html','./manifest.webmanifest','./favicon.svg',
-  './styles.css','./v2.css','./core-v1.css','./radar-v3.css','./product-v1.css','./enem-v1.css','./enem-visual-v2.css','./rumo-shell-v3.css',
-  './script.js','./app/bootstrap.js','./app/core-v2.js','./app/security-normalize-v1.js','./app/planner-v1.js','./app/account.js',
+  './styles.css','./v2.css','./core-v1.css','./radar-v3.css','./product-v1.css','./enem-v1.css','./enem-visual-v2.css','./rumo-shell-v3.css','./rumo-polish-v4.css',
+  './script.js','./app/bootstrap.js','./app/core-v2.js','./app/security-normalize-v1.js','./app/planner-v1.js','./app/account.js','./app/account-ux-v4.js',
   './app/engine-v2.js','./app/schedule-guard.js','./app/session.js','./app/reviews.js',
   './app/enem-core-v1.js','./app/enem-visual-v2.js','./app/rumo-shell-v3.js','./app/enem-practice-v1.js','./app/enem-essay-v1.js','./app/enem-mock-v1.js',
   './app/assistant.js','./app/edital.js','./app/account-extras-v2.js','./app/history-v1.js',

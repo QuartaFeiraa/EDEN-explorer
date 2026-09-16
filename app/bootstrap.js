@@ -14,6 +14,7 @@
   addCss('./rumo-shell-v3.css');
   addCss('./rumo-polish-v4.css');
   addCss('./rumo-readability-v4b.css');
+  addCss('./rumo-study-readability-v5.css');
 
   async function boot(){
     try{

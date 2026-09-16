@@ -1,0 +1,102 @@
+/* RUMO v5 — targeted readability pass for Questions and Essay.
+   These are working/study surfaces: primary information must read comfortably on desktop,
+   while metadata stays secondary without becoming microtype. */
+
+/* QUESTIONS — filters, counters, metadata and answer cards */
+body.rumo-enem-v1 #questoes .rumo-section-head p{font-size:16px;line-height:1.65}
+body.rumo-enem-v1 #questoes .rumo-inline-stats b{font-size:26px;line-height:1.05}
+body.rumo-enem-v1 #questoes .rumo-inline-stats span{font-size:12.5px;letter-spacing:.08em}
+body.rumo-enem-v1 #questoes .rumo-filter-panel{gap:17px}
+body.rumo-enem-v1 #questoes .rumo-filter-panel label{font-size:13px;line-height:1.35;font-weight:750}
+body.rumo-enem-v1 #questoes .rumo-filter-panel select{height:48px;font-size:14.5px;padding-inline:14px}
+body.rumo-enem-v1 #questoes .rumo-filter-panel small{font-size:12.5px;line-height:1.55}
+body.rumo-enem-v1 #questoes .rumo-filter-panel .primary{min-height:46px;font-size:14px}
+body.rumo-enem-v1 #questoes .rumo-question-meta{gap:9px;margin-bottom:22px}
+body.rumo-enem-v1 #questoes .rumo-question-meta span{font-size:12.5px;line-height:1.25;padding:7px 10px;border-radius:9px}
+body.rumo-enem-v1 #questoes .rumo-question h2{font-size:clamp(26px,2.25vw,34px);line-height:1.38;letter-spacing:-.03em;margin-bottom:26px}
+body.rumo-enem-v1 #questoes .rumo-options{gap:11px}
+body.rumo-enem-v1 #questoes .rumo-options button{
+  min-height:72px;
+  grid-template-columns:38px minmax(0,1fr);
+  gap:15px;
+  padding:15px 17px;
+  border-radius:12px;
+  border-color:color-mix(in srgb,var(--line) 82%,#9bb0c0);
+  background:color-mix(in srgb,var(--surface) 98%,#8aa8ff);
+}
+body.rumo-enem-v1 #questoes .rumo-options button b{width:34px;height:34px;font-size:12.5px;border-radius:8px}
+body.rumo-enem-v1 #questoes .rumo-options button span{font-size:16px;line-height:1.5;font-weight:550}
+body.rumo-enem-v1 #questoes .rumo-options button:hover:not(:disabled){
+  border-color:color-mix(in srgb,var(--enem-accent) 60%,var(--line));
+  background:color-mix(in srgb,var(--enem-accent) 8%,var(--surface));
+}
+body.rumo-enem-v1 #questoes .rumo-options button.selected{
+  border-color:var(--enem-accent);
+  background:color-mix(in srgb,var(--enem-accent) 10%,var(--surface));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--enem-accent) 28%,transparent);
+}
+body.rumo-enem-v1 #questoes .rumo-feedback b{font-size:17px}
+body.rumo-enem-v1 #questoes .rumo-feedback span{font-size:14.5px;line-height:1.65}
+body.rumo-enem-v1 #questoes .rumo-feedback button{font-size:14px;min-height:42px}
+
+/* ESSAY — theme selector, writing prompt, editor footer and competencies */
+body.rumo-enem-v1 #redacao .rumo-section-head p{font-size:16px;line-height:1.65}
+body.rumo-enem-v1 #redacao .rumo-essay-layout{grid-template-columns:minmax(300px,330px) minmax(0,1fr);gap:28px}
+body.rumo-enem-v1 #redacao .rumo-essay-list>small{font-size:12px;letter-spacing:.11em;padding:16px 4px 13px}
+body.rumo-enem-v1 #redacao .rumo-essay-list button{
+  min-height:72px;
+  padding:16px 13px;
+  gap:6px;
+  border-bottom-color:color-mix(in srgb,var(--line) 90%,#9bb0c0);
+  transition:background .15s ease,border-color .15s ease,padding-left .15s ease;
+}
+body.rumo-enem-v1 #redacao .rumo-essay-list button b{font-size:15px;line-height:1.4;font-weight:700}
+body.rumo-enem-v1 #redacao .rumo-essay-list button span{font-size:12.5px;line-height:1.4}
+body.rumo-enem-v1 #redacao .rumo-essay-list button:hover{background:color-mix(in srgb,var(--surface-2) 96%,var(--enem-accent))}
+body.rumo-enem-v1 #redacao .rumo-essay-list button.active{
+  padding-left:16px;
+  border-left:3px solid var(--enem-accent);
+  background:color-mix(in srgb,var(--enem-accent) 8%,var(--surface-2));
+}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head{padding:26px 26px 20px}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head small{font-size:12px;letter-spacing:.11em}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head h2{font-size:24px;line-height:1.32;margin:8px 0 7px}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head p{font-size:14.5px;line-height:1.65;max-width:900px}
+body.rumo-enem-v1 #redacao .rumo-editor textarea{font-size:17px;line-height:1.85;padding:28px;min-height:430px}
+body.rumo-enem-v1 #redacao .rumo-editor textarea::placeholder{font-size:16px;color:color-mix(in srgb,var(--muted) 88%,transparent)}
+body.rumo-enem-v1 #redacao .rumo-editor-foot{min-height:64px;padding:13px 17px;gap:22px;font-size:13px;line-height:1.4}
+body.rumo-enem-v1 #redacao .rumo-editor-foot button{min-height:42px;min-width:92px;font-size:14px}
+body.rumo-enem-v1 #redacao .rumo-competencies label{min-height:64px;padding:14px 13px;font-size:12.5px;line-height:1.4}
+body.rumo-enem-v1 #redacao .rumo-competencies span{font-size:12.5px;line-height:1.4}
+body.rumo-enem-v1 #redacao .rumo-competencies b{font-size:13px;margin-bottom:2px}
+
+@media(max-width:900px){
+  body.rumo-enem-v1 #redacao .rumo-essay-layout{grid-template-columns:1fr}
+  body.rumo-enem-v1 #redacao .rumo-essay-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;border-top:0}
+  body.rumo-enem-v1 #redacao .rumo-essay-list>small{grid-column:1/-1}
+  body.rumo-enem-v1 #redacao .rumo-essay-list button{border:1px solid var(--line);border-radius:10px}
+}
+
+@media(max-width:600px){
+  body.rumo-enem-v1 #questoes .rumo-section-head p,
+  body.rumo-enem-v1 #redacao .rumo-section-head p{font-size:14.5px}
+  body.rumo-enem-v1 #questoes .rumo-filter-panel label{font-size:12.5px}
+  body.rumo-enem-v1 #questoes .rumo-question-meta span{font-size:11.5px}
+  body.rumo-enem-v1 #questoes .rumo-question h2{font-size:22px;line-height:1.42}
+  body.rumo-enem-v1 #questoes .rumo-options button{min-height:64px;padding:13px 14px;grid-template-columns:34px minmax(0,1fr)}
+  body.rumo-enem-v1 #questoes .rumo-options button span{font-size:14.5px}
+  body.rumo-enem-v1 #redacao .rumo-essay-list{grid-template-columns:1fr}
+  body.rumo-enem-v1 #redacao .rumo-essay-list button{min-height:64px}
+  body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head{padding:21px 20px 17px}
+  body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head h2{font-size:21px}
+  body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head p{font-size:13.5px}
+  body.rumo-enem-v1 #redacao .rumo-editor textarea{font-size:16px;padding:20px;min-height:360px}
+  body.rumo-enem-v1 #redacao .rumo-editor-foot{font-size:12px;gap:12px}
+  body.rumo-enem-v1 #redacao .rumo-competencies label,
+  body.rumo-enem-v1 #redacao .rumo-competencies span{font-size:12px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.rumo-enem-v1 #questoes .rumo-options button,
+  body.rumo-enem-v1 #redacao .rumo-essay-list button{transition:none}
+}

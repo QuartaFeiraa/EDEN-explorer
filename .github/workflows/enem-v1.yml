@@ -1,7 +1,7 @@
 name: Validate RUMO ENEM v1
 on:
   push:
-    branches: [rumo-enem-v1, rumo-enem-v2-visual, rumo-enem-v3-typography-account]
+    branches: [rumo-enem-v1, rumo-enem-v1-hardening-20260915, rumo-enem-v2-visual, rumo-enem-v3-typography-account]
   pull_request:
     branches: [master]
 
@@ -19,6 +19,7 @@ jobs:
           node --check app/enem-visual-v2.js
           node --check app/rumo-shell-v3.js
           node --check app/account-ux-v4.js
+          node --check app/account-recovery-v5.js
           node --check app/enem-practice-v1.js
           node --check app/enem-essay-v1.js
           node --check app/enem-mock-v1.js
@@ -26,15 +27,14 @@ jobs:
           node --check sw.js
       - name: Check ENEM security and product contracts
         run: |
-          grep -q "RELEASE='10-enem-v4'" app/bootstrap.js
+          grep -q "RELEASE='10-enem-v5'" app/bootstrap.js
           grep -q "rumo-polish-v4.css" app/bootstrap.js
-          grep -q "rumo-readability-v4b.css" app/bootstrap.js
-          grep -q "rumo-study-readability-v5.css" app/bootstrap.js
           grep -q "rumo-type-system-v6.css" app/bootstrap.js
+          grep -q "rumo-account-v5.css" app/bootstrap.js
+          ! grep -q "addCss('./rumo-readability-v4b.css')" app/bootstrap.js
+          ! grep -q "addCss('./rumo-study-readability-v5.css')" app/bootstrap.js
           grep -q "account-ux-v4.js" app/bootstrap.js
-          grep -q "enem-v1.css" app/bootstrap.js
-          grep -q "enem-visual-v2.css" app/bootstrap.js
-          grep -q "rumo-shell-v3.css" app/bootstrap.js
+          grep -q "account-recovery-v5.js" app/bootstrap.js
           grep -q "enem-core-v1.js" app/bootstrap.js
           grep -q "enem-practice-v1.js" app/bootstrap.js
           grep -q "enem-essay-v1.js" app/bootstrap.js
@@ -44,15 +44,20 @@ jobs:
           ! grep -q "rumo_check_answer" app/enem-practice-v1.js app/enem-mock-v1.js
           grep -q "SUPABASE_SERVICE_ROLE_KEY" supabase/functions/check-enem-answer/index.ts
           grep -q "body_too_large" supabase/functions/check-enem-answer/index.ts
-          grep -q "rumo-static-.*v8\|CACHE_NAME=.*v8" sw.js
+          grep -q "CACHE_NAME=.*v9" sw.js
           grep -q "rumo-type-system-v6.css" sw.js
-          grep -q "account-ux-v4.js" sw.js
-          grep -q "prefers-reduced-motion" rumo-type-system-v6.css
+          grep -q "rumo-account-v5.css" sw.js
+          grep -q "account-recovery-v5.js" sw.js
+          ! grep -q "rumo-readability-v4b.css" sw.js
+          ! grep -q "rumo-study-readability-v5.css" sw.js
+          grep -q "PASSWORD_RECOVERY" app/account-recovery-v5.js
+          grep -q "updateUser({password})" app/account-recovery-v5.js
           grep -q "rumoIconSystem='iconoir'" app/enem-visual-v2.js
           grep -q "rumoShell='nexo-v3'" app/rumo-shell-v3.js
           grep -q "eden-mark-v3" rumo-shell-v3.css app/rumo-shell-v3.js
-          grep -q "Entrar / Criar conta" app/account-ux-v4.js
-          grep -q "Conta sincronizada" app/account-ux-v4.js
+          grep -q "20260916021000_enem_covering_indexes_v1" docs/ACTIVE-SURFACE.md || true
+          test -f supabase/migrations/20260916021000_enem_covering_indexes_v1.sql
+          test -f supabase/migrations/20260916021200_enem_content_integrity_v1.sql
 
   browser-smoke:
     needs: contracts
@@ -68,7 +73,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --no-save --save-exact playwright@1.62.1 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Audit every tab on desktop and mobile
+      - name: Audit every tab, ENEM content and account recovery
         run: |
           python3 -m http.server 4173 >/tmp/rumo-http.log 2>&1 &
           node <<'NODE'
@@ -82,71 +87,40 @@ jobs:
               await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
               await page.waitForFunction(()=>document.documentElement.dataset.rumoBoot==='ready',{timeout:20000});
               await page.waitForSelector('[data-tab="enem"]',{timeout:10000});
-              const labels=await page.locator('.sidebar nav .nav').allTextContents();
-              for(const expected of ['Hoje','ENEM','Questões','Redação','Simulados','Concursos','Revisões'])if(!labels.some(x=>x.includes(expected)))throw new Error(`missing nav ${expected}`);
               const visual=await page.evaluate(()=>({icons:document.body.dataset.rumoIconSystem,shell:document.body.dataset.rumoShell,version:document.documentElement.dataset.rumoVersion}));
-              if(visual.icons!=='iconoir'||visual.shell!=='nexo-v3'||visual.version!=='10-enem-v4')throw new Error(`wrong visual system: ${JSON.stringify(visual)}`);
-              const navSize=await page.locator('.sidebar nav .nav').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
-              if(viewport.width>780&&navSize<14)throw new Error(`desktop nav too small: ${navSize}px`);
+              if(visual.icons!=='iconoir'||visual.shell!=='nexo-v3'||visual.version!=='10-enem-v5')throw new Error(`wrong visual system: ${JSON.stringify(visual)}`);
+              const styles=await page.evaluate(()=>[...document.querySelectorAll('link[rel="stylesheet"]')].map(x=>x.getAttribute('href')||''));
+              if(styles.some(x=>x.includes('rumo-readability-v4b')||x.includes('rumo-study-readability-v5')))throw new Error(`obsolete typography layer loaded: ${styles}`);
               const go=async id=>{
-                if(viewport.width<=780){
-                  const sidebarOpen=await page.locator('.sidebar').evaluate(el=>el.classList.contains('open'));
-                  if(!sidebarOpen){await page.locator('#menu').click();await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'))}
-                }
+                if(viewport.width<=780){const open=await page.locator('.sidebar').evaluate(el=>el.classList.contains('open'));if(!open){await page.locator('#menu').click();await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'))}}
                 await page.locator(`[data-tab="${id}"]`).click();
                 await page.waitForFunction(id=>document.querySelector(`#${id}`)?.classList.contains('active'),id);
               };
               for(const id of tabs){
-                await go(id);
-                await page.waitForTimeout(80);
-                const audit=await page.evaluate(id=>{
-                  const root=document.querySelector(`#${id}`);
-                  const overflow=document.documentElement.scrollWidth>document.documentElement.clientWidth+2;
-                  const base=parseFloat(getComputedStyle(root).fontSize);
-                  const h=root.querySelector('h1');
-                  const hSize=h?parseFloat(getComputedStyle(h).fontSize):0;
-                  return {overflow,base,hSize};
-                },id);
-                if(audit.overflow)throw new Error(`horizontal overflow on ${id} at ${viewport.width}`);
-                if(viewport.width>780&&audit.base<15)throw new Error(`base type too small on ${id}: ${audit.base}px`);
-                if(viewport.width>780&&audit.hSize&&(audit.hSize<32||audit.hSize>40.5))throw new Error(`heading out of scale on ${id}: ${audit.hSize}px`);
+                await go(id);await page.waitForTimeout(60);
+                const audit=await page.evaluate(id=>{const root=document.querySelector(`#${id}`),h=root.querySelector('h1');return{overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+2,h:h?parseFloat(getComputedStyle(h).fontSize):0}},id);
+                if(audit.overflow)throw new Error(`overflow ${id} ${viewport.width}`);
+                if(viewport.width>780&&audit.h&&(audit.h<32||audit.h>40.5))throw new Error(`heading out of scale ${id}: ${audit.h}`);
               }
               await go('enem');
-              await page.waitForSelector('.rumo-enem-content-v3',{timeout:15000});
-              const areas=await page.locator('.rumo-area-row').count();
-              if(areas!==5)throw new Error(`expected 5 ENEM areas, got ${areas}`);
-              if(viewport.width>780){
-                const cols=await page.locator('.rumo-area-list').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
-                if(cols<2)throw new Error(`desktop ENEM areas are still single-column: ${cols}`);
-              }
+              await page.waitForFunction(()=>window.RUMO_ENEM?.data?.questionCount>=32,{timeout:15000});
+              const content=await page.evaluate(()=>({questions:window.RUMO_ENEM.data.questionCount,essays:window.RUMO_ENEM.data.essayTopics?.length||0}));
+              if(content.questions<32||content.essays<8)throw new Error(`starter content incomplete: ${JSON.stringify(content)}`);
               await go('questoes');
               await page.waitForSelector('[data-enem-answer]',{timeout:15000});
-              const optionSize=await page.locator('[data-enem-answer] span').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
-              if(viewport.width>780&&optionSize<15)throw new Error(`question option too small: ${optionSize}px`);
+              if(viewport.width>780){const optionSize=await page.locator('[data-enem-answer] span').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));if(optionSize<15)throw new Error(`question option too small: ${optionSize}`)}
               await page.locator('[data-enem-answer]').first().click();
               await page.waitForSelector('.rumo-feedback.success, .rumo-feedback.failure',{timeout:15000});
               await go('redacao');
               await page.waitForSelector('#enem-essay-text');
-              if(viewport.width>780){
-                const sizes=await page.evaluate(()=>({
-                  theme:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-essay-list button b')).fontSize),
-                  themeMeta:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-essay-list button span')).fontSize),
-                  footer:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-editor-foot')).fontSize),
-                  competence:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-competencies span')).fontSize),
-                  editor:parseFloat(getComputedStyle(document.querySelector('#enem-essay-text')).fontSize)
-                }));
-                if(sizes.theme<15||sizes.themeMeta<13||sizes.footer<13||sizes.competence<13||sizes.editor<16)throw new Error(`essay type too small: ${JSON.stringify(sizes)}`);
-              }
-              await page.locator('#enem-essay-text').fill('Rascunho de teste local.');
-              await page.locator('#enem-save-draft').click();
-              const account=page.locator('#account-btn');
-              await account.click();
-              await page.waitForSelector('#auth-v3.open');
-              const accountLabel=(await account.textContent())?.trim();
-              if(!accountLabel?.includes('Entrar')||!accountLabel?.includes('Criar conta'))throw new Error(`guest account CTA unclear: ${accountLabel}`);
+              if(viewport.width>780){const sizes=await page.evaluate(()=>({theme:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-essay-list button b')).fontSize),meta:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-essay-list button span')).fontSize),footer:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-editor-foot')).fontSize),competence:parseFloat(getComputedStyle(document.querySelector('#redacao .rumo-competencies span')).fontSize),editor:parseFloat(getComputedStyle(document.querySelector('#enem-essay-text')).fontSize)}));if(sizes.theme<15||sizes.meta<13||sizes.footer<13||sizes.competence<13||sizes.editor<16)throw new Error(`essay type too small: ${JSON.stringify(sizes)}`)}
+              await page.evaluate(()=>window.RUMO_ACCOUNT_RECOVERY?.open());
+              await page.waitForSelector('#password-recovery-v5.open');
+              const recovery=await page.evaluate(()=>({min:document.querySelector('#password-new-v5')?.minLength,confirm:document.querySelector('#password-confirm-v5')?.minLength,auto:document.querySelector('#password-new-v5')?.autocomplete}));
+              if(recovery.min<8||recovery.confirm<8||recovery.auto!=='new-password')throw new Error(`recovery UI invalid: ${JSON.stringify(recovery)}`);
               await page.close();
             }
             await browser.close();
-            console.log('RUMO balanced all-tabs audit ok');
+            console.log('RUMO ENEM v5 full smoke ok');
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

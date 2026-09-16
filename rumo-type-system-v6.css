@@ -1,0 +1,130 @@
+/* RUMO v6 — per-tab typography system.
+   Fixes the previous global-scale mistake: titles are capped, while functional study text
+   is raised to readable desktop sizes. Loaded last and intentionally scoped by tab. */
+
+/* Shared application scale: professional, not landing-page oversized. */
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .rumo-section-head h1,
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact h1{
+  font-size:clamp(32px,2.7vw,40px)!important;
+  line-height:1.08!important;
+  letter-spacing:-.035em!important;
+}
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .rumo-section-head p,
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact p{
+  font-size:15px!important;
+  line-height:1.6!important;
+}
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .eyebrow{
+  font-size:11.5px!important;
+  letter-spacing:.11em!important;
+}
+
+/* HOJE */
+body.rumo-enem-v1 #hoje .study b{font-size:15px!important}
+body.rumo-enem-v1 #hoje .study span{font-size:13.5px!important;line-height:1.45}
+body.rumo-enem-v1 #hoje .study .time{font-size:12.5px!important}
+body.rumo-enem-v1 #hoje .study.rumo-task .task-type{font-size:11.5px!important}
+body.rumo-enem-v1 #hoje .mini-stats span,
+body.rumo-enem-v1 #hoje .rumo-home-copy small,
+body.rumo-enem-v1 #hoje .rumo-home-metrics span{font-size:12.5px!important}
+body.rumo-enem-v1 #hoje .rumo-home-copy span,
+body.rumo-enem-v1 #hoje .comeback,
+body.rumo-enem-v1 #hoje .hours span{font-size:13.5px!important}
+
+/* ENEM */
+body.rumo-enem-v1 #enem .rumo-enem-snapshot-v3>small,
+body.rumo-enem-v1 #enem .rumo-overview-label-v3 small,
+body.rumo-enem-v1 #enem .rumo-axis>small{font-size:11.5px!important}
+body.rumo-enem-v1 #enem .rumo-snapshot-grid-v3 span,
+body.rumo-enem-v1 #enem .rumo-overview-label-v3 span,
+body.rumo-enem-v1 #enem .rumo-area-meta,
+body.rumo-enem-v1 #enem .rumo-area-copy small,
+body.rumo-enem-v1 #enem .rumo-axis span,
+body.rumo-enem-v1 #enem .rumo-enem-footnote{font-size:12.5px!important;line-height:1.45!important}
+body.rumo-enem-v1 #enem .rumo-area-copy b{font-size:15.5px!important}
+body.rumo-enem-v1 #enem .rumo-overview-label-v3 h2{font-size:20px!important}
+body.rumo-enem-v1 #enem .rumo-source-link{font-size:13px!important}
+
+/* QUESTÕES — functional information must never be microtype. */
+body.rumo-enem-v1 #questoes .rumo-inline-stats b{font-size:24px!important}
+body.rumo-enem-v1 #questoes .rumo-inline-stats span{font-size:13px!important;letter-spacing:.055em!important}
+body.rumo-enem-v1 #questoes .rumo-filter-panel label{font-size:13.5px!important;font-weight:700!important}
+body.rumo-enem-v1 #questoes .rumo-filter-panel select{font-size:15px!important;height:48px!important}
+body.rumo-enem-v1 #questoes .rumo-filter-panel small{font-size:13px!important;line-height:1.5!important}
+body.rumo-enem-v1 #questoes .rumo-filter-panel button{font-size:14px!important}
+body.rumo-enem-v1 #questoes .rumo-question-meta span{font-size:13px!important;padding:7px 10px!important}
+body.rumo-enem-v1 #questoes .rumo-question h2{font-size:clamp(24px,2vw,29px)!important;line-height:1.4!important;margin-bottom:24px!important}
+body.rumo-enem-v1 #questoes .rumo-options button{min-height:70px!important;padding:15px 17px!important}
+body.rumo-enem-v1 #questoes .rumo-options button b{font-size:13px!important}
+body.rumo-enem-v1 #questoes .rumo-options button span{font-size:15.5px!important;line-height:1.5!important;font-weight:520!important}
+body.rumo-enem-v1 #questoes .rumo-feedback b{font-size:16px!important}
+body.rumo-enem-v1 #questoes .rumo-feedback span{font-size:14px!important;line-height:1.6!important}
+
+/* REDAÇÃO — theme selector, editor metadata and competencies. */
+body.rumo-enem-v1 #redacao .rumo-essay-layout{grid-template-columns:minmax(310px,340px) minmax(0,1fr)!important;gap:26px!important}
+body.rumo-enem-v1 #redacao .rumo-essay-list>small{font-size:13px!important;letter-spacing:.08em!important;padding:14px 4px 12px!important}
+body.rumo-enem-v1 #redacao .rumo-essay-list button{min-height:76px!important;padding:16px 14px!important}
+body.rumo-enem-v1 #redacao .rumo-essay-list button b{font-size:15.5px!important;line-height:1.35!important}
+body.rumo-enem-v1 #redacao .rumo-essay-list button span{font-size:13.5px!important;line-height:1.4!important}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head small{font-size:13px!important;letter-spacing:.08em!important}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head h2{font-size:23px!important;line-height:1.3!important}
+body.rumo-enem-v1 #redacao .rumo-editor #enem-essay-head p{font-size:14.5px!important;line-height:1.6!important}
+body.rumo-enem-v1 #redacao .rumo-editor textarea{font-size:16.5px!important;line-height:1.8!important}
+body.rumo-enem-v1 #redacao .rumo-editor textarea::placeholder{font-size:15.5px!important}
+body.rumo-enem-v1 #redacao .rumo-editor-foot{font-size:13.5px!important;line-height:1.4!important;min-height:64px!important}
+body.rumo-enem-v1 #redacao .rumo-editor-foot button{font-size:14px!important;min-height:42px!important}
+body.rumo-enem-v1 #redacao .rumo-competencies label{font-size:13.5px!important;line-height:1.4!important;min-height:70px!important;padding:14px 13px!important}
+body.rumo-enem-v1 #redacao .rumo-competencies b{font-size:14px!important}
+body.rumo-enem-v1 #redacao .rumo-competencies span{font-size:13.5px!important;line-height:1.4!important}
+
+/* SIMULADOS */
+body.rumo-enem-v1 #simulados .rumo-mock-setup small,
+body.rumo-enem-v1 #simulados .rumo-mock-top small,
+body.rumo-enem-v1 #simulados .rumo-mock-result>small{font-size:12.5px!important}
+body.rumo-enem-v1 #simulados .rumo-mock-setup h2{font-size:25px!important}
+body.rumo-enem-v1 #simulados .rumo-mock-setup p,
+body.rumo-enem-v1 #simulados .rumo-mock-result p{font-size:14px!important;line-height:1.55!important}
+body.rumo-enem-v1 #simulados .rumo-mock-controls label{font-size:13.5px!important}
+body.rumo-enem-v1 #simulados .rumo-mock-controls select{font-size:14.5px!important}
+body.rumo-enem-v1 #simulados .rumo-mock-nav span,
+body.rumo-enem-v1 #simulados .rumo-score span{font-size:13px!important}
+body.rumo-enem-v1 #simulados .rumo-result-areas div{font-size:14px!important}
+
+/* CONCURSOS */
+body.rumo-enem-v1 #concursos .search input{font-size:15px!important}
+body.rumo-enem-v1 #concursos .toolbar select{font-size:14px!important}
+body.rumo-enem-v1 #concursos .contest h3{font-size:17px!important;line-height:1.35!important}
+body.rumo-enem-v1 #concursos .contest p{font-size:14px!important;line-height:1.5!important}
+body.rumo-enem-v1 #concursos .status,
+body.rumo-enem-v1 #concursos .meta span{font-size:12.5px!important}
+body.rumo-enem-v1 #concursos .meta-state,
+body.rumo-enem-v1 #concursos .salary{font-size:13.5px!important}
+
+/* REVISÕES */
+body.rumo-enem-v1 #revisoes .review-section-head h2{font-size:22px!important}
+body.rumo-enem-v1 #revisoes .review-section-head p{font-size:14.5px!important}
+body.rumo-enem-v1 #revisoes .due-card h3,
+body.rumo-enem-v1 #revisoes .error-card h3{font-size:15.5px!important}
+body.rumo-enem-v1 #revisoes .due-card p,
+body.rumo-enem-v1 #revisoes .error-card p{font-size:13.5px!important}
+body.rumo-enem-v1 #revisoes .due-card .due-meta,
+body.rumo-enem-v1 #revisoes .error-card .due-meta,
+body.rumo-enem-v1 #revisoes .weakness-strip span{font-size:12.5px!important}
+body.rumo-enem-v1 #revisoes .due-actions button,
+body.rumo-enem-v1 #revisoes .add-error-btn{font-size:13px!important}
+
+@media(max-width:780px){
+  body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .rumo-section-head h1,
+  body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact h1{font-size:30px!important}
+  body.rumo-enem-v1 #redacao .rumo-essay-layout{grid-template-columns:1fr!important;gap:18px!important}
+  body.rumo-enem-v1 #redacao .rumo-essay-list button b{font-size:14.5px!important}
+  body.rumo-enem-v1 #redacao .rumo-essay-list button span{font-size:12.5px!important}
+  body.rumo-enem-v1 #redacao .rumo-competencies label,
+  body.rumo-enem-v1 #redacao .rumo-competencies span{font-size:12.5px!important}
+  body.rumo-enem-v1 #questoes .rumo-options button span{font-size:14.5px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.rumo-enem-v1 #questoes .rumo-options button,
+  body.rumo-enem-v1 #redacao .rumo-essay-list button{transition:none!important}
+}

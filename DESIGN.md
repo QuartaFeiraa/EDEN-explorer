@@ -32,24 +32,31 @@ ENEM is the dominant product entry. Concursos remains a first-class product area
 - Real performance data is preferred to decorative metrics.
 - Weaknesses, errors and due reviews should feed future study direction.
 
-## Visual direction — ENEM v10
+## Visual direction — NEXO density, RUMO identity
 
-The v9 shell remains the engineering foundation, but the ENEM pivot explicitly authorizes controlled visual evolution.
+RUMO inherits the **product discipline** that worked in EDEN NEXO, not NEXO's exact colors or content:
+- persistent desktop application shell;
+- compact sidebar with grouped navigation;
+- compact top context/header;
+- useful information above decorative space;
+- 12–14 px structural gaps for dense working surfaces;
+- panels sized by content instead of landing-page whitespace;
+- real metrics, short labels and clear next actions;
+- responsive drawer on mobile instead of duplicating navigation systems.
 
-Current approved direction:
-- **21st.dev Bloom Field** as inspiration for organic bloom gradients;
-- **21st.dev Limelight Nav** as inspiration for focused active-navigation light;
-- gradients use the RUMO navy/cobalt/cyan palette and remain concentrated in hero, active navigation and primary action;
-- no generic purple/black AI aesthetic, rainbow gradients, decorative glow clouds across every surface, dot grids or excessive glass;
-- animations must use cheap compositor-friendly transforms where practical and respect `prefers-reduced-motion`;
-- typography stays content-first, with large readable hierarchy and no microtext for essential information;
-- lists/rows are preferred when they communicate curriculum or progression better than card grids;
-- borders, radius and shadows remain restrained.
+The ENEM overview must behave like a working product dashboard, not a marketing hero. The four objective areas and Redação should be scan-friendly and compact; cognitive axes are supporting information, not the dominant visual block.
+
+## Gradient and motion
+
+21st.dev is the primary external visual reference. The Bloom Field / Limelight ideas may inform RUMO, but they are deliberately restrained:
+- gradients belong to primary action, selected navigation, small accent lines and controlled hero emphasis;
+- no full-screen glow clouds, dot-grid backgrounds, purple/black AI styling or ornamental effects without product purpose;
+- motion must use cheap compositor-friendly properties where practical and respect `prefers-reduced-motion`.
 
 ## Icon system
 
-RUMO uses **Iconoir** as the approved product icon language for the ENEM v10 navigation:
-- consistent 24x24 stroke geometry;
+RUMO uses **Iconoir** as the approved product icon language:
+- consistent stroke geometry;
 - embedded SVGs rather than a runtime icon CDN;
 - no emoji as UI icons;
 - no mixed icon families;
@@ -57,17 +64,27 @@ RUMO uses **Iconoir** as the approved product icon language for the ENEM v10 nav
 
 Third-party icon attribution is recorded in `THIRD_PARTY_NOTICES.md`.
 
-## Brand
+## EDEN family signature
 
-- Product name: `RUMO`.
-- EDEN is a discreet family signature.
-- Prefer direction, route, progress, preparation and mastery metaphors.
-- Do not let branding compete with study content.
+The EDEN family mark is mandatory but discreet:
+- use the approved EDEN symbol plus lowercase `eden`;
+- `eden` uses Plus Jakarta Sans;
+- keep it in a stable institutional location such as the sidebar footer or product information area;
+- never leave `EDEN` as loose microtext or place the family signature where it competes with RUMO;
+- legal links live under the family signature with subdued styling.
+
+## Typography and spacing
+
+- RUMO working surfaces use Plus Jakarta Sans with system fallbacks.
+- Essential text cannot rely on microtype; 8–10 px text is limited to metadata/kickers only.
+- Desktop content should normally stay around 1180 px or less rather than stretching across ultrawide screens.
+- Prefer two-column information density when it improves scanning; collapse cleanly to one column on mobile.
+- Avoid empty vertical bands created only to make a screen feel "premium".
 
 ## Mobile / PWA
 
 RUMO must be fully usable on phone and as an installed PWA:
-- no horizontal overflow;
+- no horizontal overflow at 360 px and above;
 - comfortable touch targets;
 - no hover-only actions;
 - question answering and essay writing must work on small screens;
@@ -81,8 +98,8 @@ Important surfaces require intentional loading, empty, degraded, error, success 
 
 ## Anti-vibe guardrails
 
-Avoid generic bento layouts, unnecessary card grids, excessive shadows/rounding, rainbow statuses, emoji product iconography, decorative terminals, fake charts, fake testimonials, fabricated urgency and visual effects without product purpose.
+Avoid generic bento layouts, arbitrary three-card rows, excessive shadows/rounding, rainbow statuses, emoji product iconography, decorative terminals, fake charts, fake testimonials, fabricated urgency, huge marketing typography inside the app and visual effects without product purpose.
 
 ## Change ownership
 
-Security/backend work must preserve the approved product language. Future visual changes require explicit review. Current EDEN reference libraries remain inspiration, not templates to copy blindly.
+Security/backend work must preserve the approved product language. Visual changes require explicit review. 21st.dev is the first external reference, followed by Cult UI, Origin UI and Skiper UI; references are patterns to adapt, not templates to paste blindly.

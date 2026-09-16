@@ -1,0 +1,14 @@
+/* Account-only surface. Keeps auth readable without affecting study typography. */
+body.rumo-enem-v1 .password-recovery-shell{width:min(560px,calc(100vw - 32px));padding:30px}
+body.rumo-enem-v1 .password-recovery-shell h2{font:750 28px/1.18 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:-.035em;margin:10px 0 8px}
+body.rumo-enem-v1 .password-recovery-shell>p{font-size:14.5px;line-height:1.6;color:var(--muted);margin-bottom:20px}
+body.rumo-enem-v1 .password-recovery-shell .field label{font-size:12.5px;font-weight:700;letter-spacing:.04em}
+body.rumo-enem-v1 .password-recovery-shell input{min-height:50px;padding:0 14px;border-radius:10px;font-size:16px}
+body.rumo-enem-v1 .password-recovery-shell .form-message{min-height:22px;font-size:13px;line-height:1.45}
+body.rumo-enem-v1 .password-recovery-shell .auth-submit{min-height:48px;font-size:14px}
+body.rumo-enem-v1 .password-recovery-shell .auth-submit:disabled{opacity:.65;cursor:wait}
+@media(max-width:600px){
+  body.rumo-enem-v1 .password-recovery-shell{padding:22px 18px}
+  body.rumo-enem-v1 .password-recovery-shell h2{font-size:25px}
+  body.rumo-enem-v1 .password-recovery-shell>p{font-size:14px}
+}

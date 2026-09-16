@@ -4,13 +4,15 @@
 
 /* Shared application scale: professional, not landing-page oversized. */
 body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .rumo-section-head h1,
-body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact h1{
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact h1,
+body.rumo-enem-v1 #hoje .hero-home h1{
   font-size:clamp(32px,2.7vw,40px)!important;
   line-height:1.08!important;
   letter-spacing:-.035em!important;
 }
 body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .rumo-section-head p,
-body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact p{
+body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact p,
+body.rumo-enem-v1 #hoje .hero-home p{
   font-size:15px!important;
   line-height:1.6!important;
 }
@@ -115,7 +117,8 @@ body.rumo-enem-v1 #revisoes .add-error-btn{font-size:13px!important}
 
 @media(max-width:780px){
   body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .rumo-section-head h1,
-  body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact h1{font-size:30px!important}
+  body.rumo-enem-v1 :is(#hoje,#enem,#questoes,#redacao,#simulados,#concursos,#revisoes) .hero.compact h1,
+  body.rumo-enem-v1 #hoje .hero-home h1{font-size:30px!important}
   body.rumo-enem-v1 #redacao .rumo-essay-layout{grid-template-columns:1fr!important;gap:18px!important}
   body.rumo-enem-v1 #redacao .rumo-essay-list button b{font-size:14.5px!important}
   body.rumo-enem-v1 #redacao .rumo-essay-list button span{font-size:12.5px!important}

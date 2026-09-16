@@ -1,0 +1,337 @@
+/* RUMO v4 — desktop readability, professional selection states and account polish.
+   This layer intentionally loads last. It raises the working type scale across every tab
+   without returning to oversized landing-page spacing. */
+
+body.rumo-enem-v1{
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---------- global working scale ---------- */
+body.rumo-enem-v1 .page{font-size:15px}
+body.rumo-enem-v1 .nav{font-size:14px;font-weight:650}
+body.rumo-enem-v1 .brand-copy strong{font-size:16px}
+body.rumo-enem-v1 .brand-copy span{font-size:11.5px}
+body.rumo-enem-v1 .rumo-nav-group-v3{font-size:9.5px;letter-spacing:.13em}
+body.rumo-enem-v1 .rumo-top-context-v3 small{font-size:10.5px}
+body.rumo-enem-v1 .rumo-top-context-v3 strong{font-size:13.5px}
+body.rumo-enem-v1 .eyebrow,
+body.rumo-enem-v1 .plan-kicker{font-size:12px;letter-spacing:.12em}
+body.rumo-enem-v1 .hero p,
+body.rumo-enem-v1 .rumo-section-head p{font-size:15px;line-height:1.62}
+body.rumo-enem-v1 .hero.compact h1{font-size:clamp(34px,3.2vw,46px)}
+body.rumo-enem-v1 .card h2{font-size:22px;line-height:1.22}
+body.rumo-enem-v1 .card small,
+body.rumo-enem-v1 .objective-strip small{font-size:11.5px;letter-spacing:.1em}
+body.rumo-enem-v1 .objective-strip b{font-size:15px}
+body.rumo-enem-v1 .metric{font-size:14px}
+body.rumo-enem-v1 .metric b{font-size:15px}
+body.rumo-enem-v1 .note,
+body.rumo-enem-v1 .muted{font-size:13px;line-height:1.55}
+body.rumo-enem-v1 button,
+body.rumo-enem-v1 input,
+body.rumo-enem-v1 select,
+body.rumo-enem-v1 textarea{font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+body.rumo-enem-v1 .primary,
+body.rumo-enem-v1 .secondary,
+body.rumo-enem-v1 .ghost,
+body.rumo-enem-v1 .text-link{font-size:13.5px}
+
+/* ---------- Today ---------- */
+body.rumo-enem-v1 .study{min-height:72px}
+body.rumo-enem-v1 .study b{font-size:15px;line-height:1.35}
+body.rumo-enem-v1 .study span{font-size:13px;line-height:1.4}
+body.rumo-enem-v1 .study .time{font-size:12px}
+body.rumo-enem-v1 .study.rumo-task .task-type{font-size:10.5px!important}
+body.rumo-enem-v1 .mini-stats b{font-size:20px}
+body.rumo-enem-v1 .mini-stats span{font-size:12px}
+body.rumo-enem-v1 .trend{font-size:11px}
+body.rumo-enem-v1 .comeback{font-size:13px;line-height:1.55}
+body.rumo-enem-v1 .hours span{font-size:13px}
+
+/* ---------- ENEM overview ---------- */
+body.rumo-enem-v1 #enem .rumo-section-head h1{font-size:clamp(34px,3vw,42px)}
+body.rumo-enem-v1 #enem .rumo-section-head p{font-size:14.5px}
+body.rumo-enem-v1 .rumo-enem-snapshot-v3>small,
+body.rumo-enem-v1 .rumo-overview-label-v3 small,
+body.rumo-enem-v1 .rumo-axis>small{font-size:10.5px}
+body.rumo-enem-v1 .rumo-snapshot-grid-v3 b{font-size:22px}
+body.rumo-enem-v1 .rumo-snapshot-grid-v3 span{font-size:11.5px;line-height:1.35}
+body.rumo-enem-v1 .rumo-overview-label-v3 h2{font-size:20px}
+body.rumo-enem-v1 .rumo-overview-label-v3 span{font-size:11.5px}
+body.rumo-enem-v1 .rumo-area-index{font-size:11px}
+body.rumo-enem-v1 .rumo-area-copy b{font-size:15px}
+body.rumo-enem-v1 .rumo-area-copy small{font-size:11.5px;line-height:1.4}
+body.rumo-enem-v1 .rumo-area-meta{font-size:11px}
+body.rumo-enem-v1 .rumo-axis span{font-size:11.5px;line-height:1.35}
+body.rumo-enem-v1 .rumo-axis span b{font-size:10.5px}
+body.rumo-enem-v1 .rumo-enem-footnote{font-size:11.5px}
+body.rumo-enem-v1 .rumo-enem-footnote b{font-size:10.5px}
+body.rumo-enem-v1 .rumo-source-link{font-size:12.5px}
+
+/* ---------- Questions ---------- */
+body.rumo-enem-v1 .rumo-filter-panel label,
+body.rumo-enem-v1 .rumo-mock-controls label{font-size:12px}
+body.rumo-enem-v1 .rumo-filter-panel select,
+body.rumo-enem-v1 .rumo-mock-controls select{height:46px;font-size:14px;border-radius:10px}
+body.rumo-enem-v1 .rumo-filter-panel small{font-size:11.5px;line-height:1.55}
+body.rumo-enem-v1 .rumo-question-meta span{font-size:11px;padding:6px 9px;border-radius:8px}
+body.rumo-enem-v1 .rumo-question h2,
+body.rumo-enem-v1 .rumo-mock h2{font-size:clamp(22px,2.1vw,30px);line-height:1.42}
+body.rumo-enem-v1 .rumo-options{gap:10px}
+body.rumo-enem-v1 .rumo-options button{
+  min-height:66px;
+  padding:14px 16px;
+  border-radius:12px;
+  transition:border-color .15s ease,background .15s ease,transform .15s ease;
+}
+body.rumo-enem-v1 .rumo-options button:hover:not(:disabled){transform:translateY(-1px)}
+body.rumo-enem-v1 .rumo-options button b{font-size:12px;border-radius:8px}
+body.rumo-enem-v1 .rumo-options button span{font-size:15px;line-height:1.5}
+body.rumo-enem-v1 .rumo-feedback b{font-size:16px}
+body.rumo-enem-v1 .rumo-feedback span{font-size:14px}
+body.rumo-enem-v1 .rumo-state b{font-size:18px}
+body.rumo-enem-v1 .rumo-state span{font-size:13px}
+
+/* ---------- Essay ---------- */
+body.rumo-enem-v1 .rumo-essay-list>small{font-size:10.5px}
+body.rumo-enem-v1 .rumo-essay-list button{padding:16px 8px;border-radius:0}
+body.rumo-enem-v1 .rumo-essay-list button b{font-size:14px}
+body.rumo-enem-v1 .rumo-essay-list button span{font-size:11.5px}
+body.rumo-enem-v1 .rumo-editor #enem-essay-head small{font-size:10.5px}
+body.rumo-enem-v1 .rumo-editor #enem-essay-head h2{font-size:22px}
+body.rumo-enem-v1 .rumo-editor #enem-essay-head p{font-size:13.5px}
+body.rumo-enem-v1 .rumo-editor textarea{font-size:16px;line-height:1.8}
+body.rumo-enem-v1 .rumo-editor-foot{font-size:11.5px}
+body.rumo-enem-v1 .rumo-competencies label{font-size:11.5px;line-height:1.4}
+body.rumo-enem-v1 .rumo-competencies b{font-size:12px}
+
+/* ---------- Simulados ---------- */
+body.rumo-enem-v1 .rumo-mock-setup small,
+body.rumo-enem-v1 .rumo-mock-top small,
+body.rumo-enem-v1 .rumo-mock-result>small{font-size:10.5px}
+body.rumo-enem-v1 .rumo-mock-setup h2{font-size:28px}
+body.rumo-enem-v1 .rumo-mock-setup p{font-size:14px;line-height:1.55}
+body.rumo-enem-v1 .rumo-mock-top b{font-size:15px}
+body.rumo-enem-v1 .rumo-mock-nav span{font-size:12px}
+body.rumo-enem-v1 .rumo-score span{font-size:13px}
+body.rumo-enem-v1 .rumo-result-areas div{font-size:13.5px}
+body.rumo-enem-v1 .rumo-mock-result p{font-size:14px}
+
+/* ---------- Concursos ---------- */
+body.rumo-enem-v1 .search input{font-size:14.5px}
+body.rumo-enem-v1 .toolbar select{font-size:13.5px}
+body.rumo-enem-v1 .contest{
+  min-height:205px;
+  padding:18px;
+  border-radius:14px;
+  box-shadow:none;
+}
+body.rumo-enem-v1 .contest h3{font-size:16px;line-height:1.35}
+body.rumo-enem-v1 .contest p{font-size:13px;line-height:1.5}
+body.rumo-enem-v1 .status,
+body.rumo-enem-v1 .meta span{font-size:11px}
+body.rumo-enem-v1 .meta-state{font-size:12px}
+body.rumo-enem-v1 .salary{font-size:13px}
+
+/* ---------- Reviews / study sessions ---------- */
+body.rumo-enem-v1 .review-section-head h2{font-size:22px}
+body.rumo-enem-v1 .review-section-head p{font-size:14px;line-height:1.5}
+body.rumo-enem-v1 .due-card h3,
+body.rumo-enem-v1 .error-card h3{font-size:15px}
+body.rumo-enem-v1 .due-card p,
+body.rumo-enem-v1 .error-card p{font-size:13px}
+body.rumo-enem-v1 .due-card .due-meta,
+body.rumo-enem-v1 .error-card .due-meta{font-size:11px}
+body.rumo-enem-v1 .due-actions button,
+body.rumo-enem-v1 .add-error-btn{font-size:12.5px}
+body.rumo-enem-v1 .weakness-strip span{font-size:12px}
+body.rumo-enem-v1 .study-step{font-size:13px}
+body.rumo-enem-v1 .study-panel h3{font-size:22px}
+body.rumo-enem-v1 .study-panel>p{font-size:14px}
+body.rumo-enem-v1 .resource-btn b{font-size:14px}
+body.rumo-enem-v1 .resource-btn span{font-size:12.5px}
+body.rumo-enem-v1 .review-action{font-size:13px}
+body.rumo-enem-v1 .session-notes{font-size:14px}
+
+/* ---------- Legacy setup / courses / assistant: keep remaining pages readable ---------- */
+body.rumo-enem-v1 .setup-card{padding:22px;border-radius:15px;min-height:230px;box-shadow:none}
+body.rumo-enem-v1 .setup-card>span{font-size:12px}
+body.rumo-enem-v1 .setup-card h3{font-size:21px;margin:18px 0 9px}
+body.rumo-enem-v1 .setup-card p{font-size:14px;line-height:1.6}
+body.rumo-enem-v1 .course h3{font-size:17px}
+body.rumo-enem-v1 .course p{font-size:13.5px;line-height:1.55}
+body.rumo-enem-v1 .course-info span{font-size:12px}
+body.rumo-enem-v1 .course-tag{font-size:10.5px}
+body.rumo-enem-v1 .course-filter{font-size:13px;min-height:40px}
+body.rumo-enem-v1 .lesson-btn b{font-size:13px}
+body.rumo-enem-v1 .lesson-number{font-size:11px}
+body.rumo-enem-v1 .lesson-content h3{font-size:24px}
+body.rumo-enem-v1 .lesson-content p{font-size:14.5px}
+body.rumo-enem-v1 .lesson-box b{font-size:13.5px}
+body.rumo-enem-v1 .lesson-box li{font-size:13.5px}
+body.rumo-enem-v1 .assistant-head b{font-size:15px}
+body.rumo-enem-v1 .assistant-head span{font-size:12px}
+body.rumo-enem-v1 .assistant-msg,
+body.rumo-enem-v1 .bubble{font-size:14px}
+body.rumo-enem-v1 .chat input{font-size:14.5px}
+body.rumo-enem-v1 .assistant .chips.compact button{font-size:12.5px}
+
+/* ---------- selection surfaces ---------- */
+body.rumo-enem-v1 .setup-card,
+body.rumo-enem-v1 .contest,
+body.rumo-enem-v1 .course,
+body.rumo-enem-v1 .choice,
+body.rumo-enem-v1 .price-card,
+body.rumo-enem-v1 .review,
+body.rumo-enem-v1 .resource-btn{
+  border-color:color-mix(in srgb,var(--line) 88%,#91a8b8);
+  background:color-mix(in srgb,var(--surface) 97%,#7ca1ff);
+}
+body.rumo-enem-v1 .setup-card,
+body.rumo-enem-v1 .contest,
+body.rumo-enem-v1 .course,
+body.rumo-enem-v1 .choice,
+body.rumo-enem-v1 .price-card,
+body.rumo-enem-v1 .resource-btn{
+  transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+body.rumo-enem-v1 .setup-card:hover,
+body.rumo-enem-v1 .contest:hover,
+body.rumo-enem-v1 .course:hover,
+body.rumo-enem-v1 .choice:hover,
+body.rumo-enem-v1 .price-card:hover,
+body.rumo-enem-v1 .resource-btn:hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--accent) 42%,var(--line));
+  background:color-mix(in srgb,var(--surface) 94%,var(--accent));
+}
+body.rumo-enem-v1 .choice.selected,
+body.rumo-enem-v1 .price-card.selected{
+  border-color:color-mix(in srgb,var(--accent) 72%,var(--line));
+  background:color-mix(in srgb,var(--accent) 10%,var(--surface));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 34%,transparent);
+}
+body.rumo-enem-v1 .choice{min-height:88px;padding:15px;border-radius:12px}
+body.rumo-enem-v1 .choice b{font-size:15px}
+body.rumo-enem-v1 .choice span{font-size:13px;line-height:1.45;margin-top:5px}
+body.rumo-enem-v1 .price-card{border-radius:13px;min-height:122px;padding:18px}
+body.rumo-enem-v1 .price-card span{font-size:13px}
+body.rumo-enem-v1 .price-card b{font-size:24px}
+body.rumo-enem-v1 .price-card small{font-size:12px}
+body.rumo-enem-v1 .day-chip{
+  min-height:44px;
+  font-size:13px;
+  border-radius:10px;
+  background:var(--surface);
+}
+body.rumo-enem-v1 .day-chip.selected{
+  background:color-mix(in srgb,var(--accent) 16%,var(--surface));
+  color:var(--text);
+  border-color:var(--accent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent);
+}
+body.rumo-enem-v1 .auth-tab,
+body.rumo-enem-v1 .course-filter{
+  border:1px solid transparent;
+  border-radius:10px;
+  transition:background .15s ease,border-color .15s ease,color .15s ease;
+}
+body.rumo-enem-v1 .auth-tab.active,
+body.rumo-enem-v1 .course-filter.active{
+  border-color:var(--line);
+  background:var(--surface);
+  color:var(--text);
+  box-shadow:none;
+}
+
+/* ---------- account and authentication ---------- */
+body.rumo-enem-v1 .account-btn{
+  min-width:128px;
+  height:40px;
+  padding:0 12px;
+  border-radius:10px;
+  font-size:13.5px;
+  justify-content:flex-start;
+  box-shadow:none;
+}
+body.rumo-enem-v1 .account-dot{width:9px;height:9px}
+body.rumo-enem-v1 .account-btn.is-authenticated .account-dot{background:var(--green)}
+body.rumo-enem-v1 .modal-card.auth-shell,
+body.rumo-enem-v1 .modal-card.account-shell{width:min(620px,calc(100vw - 32px));padding:30px}
+body.rumo-enem-v1 .modal-card.onboarding-shell{width:min(800px,calc(100vw - 32px));padding:30px}
+body.rumo-enem-v1 .auth-brand{margin-bottom:20px}
+body.rumo-enem-v1 .auth-brand-mark{width:44px;height:44px;border-radius:12px;font-size:16px}
+body.rumo-enem-v1 .auth-brand strong{font:750 17px/1.2 "Plus Jakarta Sans",sans-serif;letter-spacing:.06em}
+body.rumo-enem-v1 .auth-brand span{font-size:12.5px;margin-top:3px}
+body.rumo-enem-v1 .auth-shell h2,
+body.rumo-enem-v1 .account-shell h2{font-size:28px;letter-spacing:-.035em;margin:10px 0 7px}
+body.rumo-enem-v1 .auth-shell>p,
+body.rumo-enem-v1 .account-shell>p{font-size:14.5px;line-height:1.6}
+body.rumo-enem-v1 .auth-tabs{margin:20px 0 18px;padding:5px;border:1px solid var(--line)}
+body.rumo-enem-v1 .auth-tab{min-height:42px;font-size:13.5px}
+body.rumo-enem-v1 .field{gap:7px}
+body.rumo-enem-v1 .field label{font-size:11.5px;letter-spacing:.07em}
+body.rumo-enem-v1 .field input,
+body.rumo-enem-v1 .field select{min-height:48px;font-size:15px;padding:0 14px;border-radius:10px}
+body.rumo-enem-v1 .form-message{min-height:21px;font-size:12.5px}
+body.rumo-enem-v1 .soft-btn{min-height:42px;font-size:13px}
+body.rumo-enem-v1 .auth-submit{min-height:48px;font-size:14px}
+body.rumo-enem-v1 .auth-security-note{
+  display:flex;align-items:flex-start;gap:10px;margin-top:16px;padding:12px 13px;
+  border:1px solid var(--line);border-radius:11px;background:var(--surface-2);
+  color:var(--muted);font-size:12.5px;line-height:1.5;
+}
+body.rumo-enem-v1 .auth-security-note b{color:var(--text);font-weight:700}
+body.rumo-enem-v1 .account-summary{padding:16px;border:1px solid var(--line);border-radius:12px}
+body.rumo-enem-v1 .account-avatar{width:50px;height:50px;font-size:15px}
+body.rumo-enem-v1 .account-summary b{font-size:15px}
+body.rumo-enem-v1 .account-summary span{font-size:12.5px}
+body.rumo-enem-v1 .account-status-v4{
+  display:inline-flex;align-items:center;gap:7px;margin-top:7px;font-size:11.5px;color:var(--green);font-weight:700;
+}
+body.rumo-enem-v1 .account-status-v4::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+body.rumo-enem-v1 .account-actions{gap:9px}
+body.rumo-enem-v1 .account-actions button{
+  display:grid;gap:3px;padding:13px 14px;border-radius:11px;font-size:13.5px;font-weight:700;
+}
+body.rumo-enem-v1 .account-actions button span{font-size:11.5px;font-weight:500;color:var(--muted)}
+body.rumo-enem-v1 .account-actions button:hover{border-color:color-mix(in srgb,var(--accent) 38%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--surface-2))}
+body.rumo-enem-v1 .account-actions button.danger span{color:color-mix(in srgb,var(--red) 75%,var(--muted))}
+body.rumo-enem-v1 .onboarding-step h3{font:750 24px/1.25 "Plus Jakarta Sans",sans-serif}
+body.rumo-enem-v1 .onboarding-step>p{font-size:14px}
+body.rumo-enem-v1 .personalize-btn{font-size:13px!important;min-height:40px}
+
+@media(min-width:1280px){
+  body.rumo-enem-v1 .page{max-width:1220px}
+}
+
+@media(max-width:780px){
+  body.rumo-enem-v1{font-size:15px}
+  body.rumo-enem-v1 .nav{font-size:14px}
+  body.rumo-enem-v1 .hero p,
+  body.rumo-enem-v1 .rumo-section-head p{font-size:14px}
+  body.rumo-enem-v1 .card h2{font-size:20px}
+  body.rumo-enem-v1 .rumo-options button span{font-size:14px}
+  body.rumo-enem-v1 .rumo-editor textarea{font-size:15px}
+  body.rumo-enem-v1 .modal-card.auth-shell,
+  body.rumo-enem-v1 .modal-card.onboarding-shell,
+  body.rumo-enem-v1 .modal-card.account-shell{padding:22px 18px}
+  body.rumo-enem-v1 .auth-shell h2,
+  body.rumo-enem-v1 .account-shell h2{font-size:25px}
+  body.rumo-enem-v1 .field input,
+  body.rumo-enem-v1 .field select{font-size:16px}
+  body.rumo-enem-v1 .account-btn{min-width:0;padding:0 10px;font-size:12.5px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.rumo-enem-v1 .setup-card,
+  body.rumo-enem-v1 .contest,
+  body.rumo-enem-v1 .course,
+  body.rumo-enem-v1 .choice,
+  body.rumo-enem-v1 .price-card,
+  body.rumo-enem-v1 .resource-btn,
+  body.rumo-enem-v1 .rumo-options button{transition:none!important;transform:none!important}
+}

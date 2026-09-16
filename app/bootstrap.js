@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const RELEASE='10-enem-v2';
+  const RELEASE='10-enem-v3';
   const loaded=new Map();
   const addCss=href=>{if(document.querySelector(`link[href^="${href}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${RELEASE}`;document.head.appendChild(l)};
   const loadScript=src=>{if(loaded.has(src))return loaded.get(src);const p=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=`${src}?v=${RELEASE}`;s.async=true;s.onload=()=>resolve(s);s.onerror=()=>reject(new Error(`Falha ao carregar ${src}`));document.body.appendChild(s)});loaded.set(src,p);return p};
@@ -12,6 +12,7 @@
   addCss('./enem-v1.css');
   addCss('./enem-visual-v2.css');
   addCss('./rumo-shell-v3.css');
+  addCss('./rumo-polish-v4.css');
 
   async function boot(){
     try{
@@ -27,6 +28,7 @@
 
       await Promise.all([
         loadScript('./app/account.js'),
+        loadScript('./app/account-ux-v4.js'),
         loadScript('./app/engine-v2.js'),
         loadScript('./app/schedule-guard.js'),
         loadScript('./app/session.js'),

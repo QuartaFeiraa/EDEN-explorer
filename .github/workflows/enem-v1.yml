@@ -1,7 +1,7 @@
 name: Validate RUMO ENEM v1
 on:
   push:
-    branches: [rumo-enem-v1, rumo-enem-v2-visual]
+    branches: [rumo-enem-v1, rumo-enem-v2-visual, rumo-enem-v3-typography-account]
   pull_request:
     branches: [master]
 
@@ -18,6 +18,7 @@ jobs:
           node --check app/enem-core-v1.js
           node --check app/enem-visual-v2.js
           node --check app/rumo-shell-v3.js
+          node --check app/account-ux-v4.js
           node --check app/enem-practice-v1.js
           node --check app/enem-essay-v1.js
           node --check app/enem-mock-v1.js
@@ -25,13 +26,13 @@ jobs:
           node --check sw.js
       - name: Check ENEM security and product contracts
         run: |
-          grep -q "RELEASE='10-enem-v2'" app/bootstrap.js
+          grep -q "RELEASE='10-enem-v3'" app/bootstrap.js
+          grep -q "rumo-polish-v4.css" app/bootstrap.js
+          grep -q "account-ux-v4.js" app/bootstrap.js
           grep -q "enem-v1.css" app/bootstrap.js
           grep -q "enem-visual-v2.css" app/bootstrap.js
           grep -q "rumo-shell-v3.css" app/bootstrap.js
           grep -q "enem-core-v1.js" app/bootstrap.js
-          grep -q "enem-visual-v2.js" app/bootstrap.js
-          grep -q "rumo-shell-v3.js" app/bootstrap.js
           grep -q "enem-practice-v1.js" app/bootstrap.js
           grep -q "enem-essay-v1.js" app/bootstrap.js
           grep -q "enem-mock-v1.js" app/bootstrap.js
@@ -40,13 +41,15 @@ jobs:
           ! grep -q "rumo_check_answer" app/enem-practice-v1.js app/enem-mock-v1.js
           grep -q "SUPABASE_SERVICE_ROLE_KEY" supabase/functions/check-enem-answer/index.ts
           grep -q "body_too_large" supabase/functions/check-enem-answer/index.ts
-          grep -q "rumo-static-.*v5\|CACHE_NAME=.*v5" sw.js
-          grep -q "rumo-shell-v3.js" sw.js
-          grep -q "rumo-shell-v3.css" sw.js
-          grep -q "prefers-reduced-motion" rumo-shell-v3.css
+          grep -q "rumo-static-.*v6\|CACHE_NAME=.*v6" sw.js
+          grep -q "rumo-polish-v4.css" sw.js
+          grep -q "account-ux-v4.js" sw.js
+          grep -q "prefers-reduced-motion" rumo-polish-v4.css
           grep -q "rumoIconSystem='iconoir'" app/enem-visual-v2.js
           grep -q "rumoShell='nexo-v3'" app/rumo-shell-v3.js
           grep -q "eden-mark-v3" rumo-shell-v3.css app/rumo-shell-v3.js
+          grep -q "Entrar / Criar conta" app/account-ux-v4.js
+          grep -q "Conta sincronizada" app/account-ux-v4.js
 
   browser-smoke:
     needs: contracts
@@ -62,33 +65,54 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --no-save --save-exact playwright@1.62.1 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Smoke ENEM desktop and mobile
+      - name: Audit every tab on desktop and mobile
         run: |
           python3 -m http.server 4173 >/tmp/rumo-http.log 2>&1 &
           node <<'NODE'
           const {chromium}=require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            for(const viewport of [{width:1366,height:900},{width:390,height:844},{width:360,height:800}]){
+            const viewports=[{width:1440,height:900},{width:1366,height:768},{width:390,height:844},{width:360,height:800}];
+            const tabs=['hoje','enem','questoes','redacao','simulados','concursos','revisoes'];
+            for(const viewport of viewports){
               const page=await browser.newPage({viewport});
               await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
               await page.waitForFunction(()=>document.documentElement.dataset.rumoBoot==='ready',{timeout:20000});
               await page.waitForSelector('[data-tab="enem"]',{timeout:10000});
               const labels=await page.locator('.sidebar nav .nav').allTextContents();
               for(const expected of ['Hoje','ENEM','Questões','Redação','Simulados','Concursos','Revisões'])if(!labels.some(x=>x.includes(expected)))throw new Error(`missing nav ${expected}`);
-              const visual=await page.evaluate(()=>({icons:document.body.dataset.rumoIconSystem,shell:document.body.dataset.rumoShell}));
-              if(visual.icons!=='iconoir'||visual.shell!=='nexo-v3')throw new Error(`wrong visual system: ${JSON.stringify(visual)}`);
-              const iconCount=await page.locator('.sidebar nav .nav .nav-icon svg').count();
-              if(iconCount<7)throw new Error(`missing SVG navigation icons: ${iconCount}`);
-              const eden=await page.locator('.eden-word-v3').textContent();
-              if(eden?.trim()!=='eden')throw new Error(`EDEN lockup missing: ${eden}`);
+              const visual=await page.evaluate(()=>({icons:document.body.dataset.rumoIconSystem,shell:document.body.dataset.rumoShell,version:document.documentElement.dataset.rumoVersion}));
+              if(visual.icons!=='iconoir'||visual.shell!=='nexo-v3'||visual.version!=='10-enem-v3')throw new Error(`wrong visual system: ${JSON.stringify(visual)}`);
+              const navSize=await page.locator('.sidebar nav .nav').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
+              if(viewport.width>780&&navSize<14)throw new Error(`desktop nav too small: ${navSize}px`);
               const go=async id=>{
                 if(viewport.width<=780){
-                  await page.locator('#menu').click();
-                  await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'));
+                  const sidebarOpen=await page.locator('.sidebar').evaluate(el=>el.classList.contains('open'));
+                  if(!sidebarOpen){await page.locator('#menu').click();await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'))}
                 }
                 await page.locator(`[data-tab="${id}"]`).click();
+                await page.waitForFunction(id=>document.querySelector(`#${id}`)?.classList.contains('active'),id);
               };
+              for(const id of tabs){
+                await go(id);
+                await page.waitForTimeout(80);
+                const audit=await page.evaluate(id=>{
+                  const root=document.querySelector(`#${id}`);
+                  const overflow=document.documentElement.scrollWidth>document.documentElement.clientWidth+2;
+                  const base=parseFloat(getComputedStyle(root).fontSize);
+                  const h=root.querySelector('h1');
+                  const hSize=h?parseFloat(getComputedStyle(h).fontSize):0;
+                  const visible=[...root.querySelectorAll('p,button,input,select,textarea,.metric,.rumo-options span,.contest p,.study span')]
+                    .filter(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0&&String(el.textContent||el.value||'').trim()});
+                  const bodySizes=visible.map(el=>parseFloat(getComputedStyle(el).fontSize)).filter(Number.isFinite);
+                  const readable=bodySizes.length?bodySizes.filter(x=>x>=12).length/bodySizes.length:1;
+                  return {overflow,base,hSize,readable,min:bodySizes.length?Math.min(...bodySizes):null};
+                },id);
+                if(audit.overflow)throw new Error(`horizontal overflow on ${id} at ${viewport.width}`);
+                if(viewport.width>780&&audit.base<15)throw new Error(`base type too small on ${id}: ${audit.base}px`);
+                if(viewport.width>780&&audit.hSize&&audit.hSize<30)throw new Error(`heading too small on ${id}: ${audit.hSize}px`);
+                if(viewport.width>780&&audit.readable<0.9)throw new Error(`too much microtype on ${id}: ${JSON.stringify(audit)}`);
+              }
               await go('enem');
               await page.waitForSelector('.rumo-enem-content-v3',{timeout:15000});
               const areas=await page.locator('.rumo-area-row').count();
@@ -97,21 +121,40 @@ jobs:
                 const cols=await page.locator('.rumo-area-list').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
                 if(cols<2)throw new Error(`desktop ENEM areas are still single-column: ${cols}`);
               }
-              let overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
-              if(overflow)throw new Error(`horizontal overflow on ENEM at ${viewport.width}`);
               await go('questoes');
               await page.waitForSelector('[data-enem-answer]',{timeout:15000});
+              const optionSize=await page.locator('[data-enem-answer] span').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
+              if(viewport.width>780&&optionSize<15)throw new Error(`question option too small: ${optionSize}px`);
               await page.locator('[data-enem-answer]').first().click();
               await page.waitForSelector('.rumo-feedback.success, .rumo-feedback.failure',{timeout:15000});
-              overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
-              if(overflow)throw new Error(`horizontal overflow on questions at ${viewport.width}`);
               await go('redacao');
               await page.waitForSelector('#enem-essay-text');
+              const editorSize=await page.locator('#enem-essay-text').evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
+              if(viewport.width>780&&editorSize<16)throw new Error(`essay editor too small: ${editorSize}px`);
               await page.locator('#enem-essay-text').fill('Rascunho de teste local.');
               await page.locator('#enem-save-draft').click();
+              const account=page.locator('#account-btn');
+              await account.click();
+              await page.waitForSelector('#auth-v3.open');
+              const accountLabel=(await account.textContent())?.trim();
+              if(!accountLabel?.includes('Entrar')||!accountLabel?.includes('Criar conta'))throw new Error(`guest account CTA unclear: ${accountLabel}`);
+              const authSizes=await page.evaluate(()=>({
+                tab:parseFloat(getComputedStyle(document.querySelector('.auth-tab')).fontSize),
+                label:parseFloat(getComputedStyle(document.querySelector('#auth-v3 .field label')).fontSize),
+                input:parseFloat(getComputedStyle(document.querySelector('#auth-v3 input')).fontSize)
+              }));
+              if(viewport.width>780&&(authSizes.tab<13||authSizes.label<11||authSizes.input<15))throw new Error(`account typography too small: ${JSON.stringify(authSizes)}`);
+              await page.locator('[data-auth-v3="signup"]').click();
+              const signup=await page.evaluate(()=>({
+                nameRequired:document.querySelector('#auth-name-v3').required,
+                passwordMin:document.querySelector('#auth-password-v3').minLength,
+                autocomplete:document.querySelector('#auth-password-v3').autocomplete,
+                note:document.querySelector('.auth-security-note')?.textContent||''
+              }));
+              if(!signup.nameRequired||signup.passwordMin<8||signup.autocomplete!=='new-password'||!signup.note.includes('sincronizada'))throw new Error(`signup UX incomplete: ${JSON.stringify(signup)}`);
               await page.close();
             }
             await browser.close();
-            console.log('ENEM dense visual desktop/mobile smoke ok');
+            console.log('RUMO all-tabs typography/account audit ok');
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

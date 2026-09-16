@@ -2,6 +2,7 @@
   'use strict';
   const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
   const labels={hoje:'Hoje',enem:'ENEM',questoes:'Questões',redacao:'Redação',simulados:'Simulados',concursos:'Concursos',revisoes:'Revisões'};
+  const MATRIX_URL='https://www.gov.br/inep/pt-br/centrais-de-conteudo/acervo-linha-editorial/publicacoes-institucionais/avaliacoes-e-exames-da-educacao-basica/matrizes-de-referencia-enem';
 
   function font(){
     if(document.querySelector('link[data-rumo-jakarta]'))return;
@@ -44,11 +45,12 @@
     if(!actions&&intro){actions=document.createElement('div');actions.className='rumo-enem-actions-v3';actions.innerHTML='<button class="primary" data-v3-go="questoes">Resolver questões</button><button class="secondary" data-v3-go="simulados">Fazer simulado</button>';intro.appendChild(actions)}
     qa('[data-v3-go]',actions||document).forEach(b=>b.onclick=()=>api.shell.switchTab(b.dataset.v3Go));
 
+    const oldSource=q('#enem .rumo-source-link');
+    if(oldSource&&!oldSource.closest('.rumo-enem-snapshot-v3'))oldSource.remove();
     let box=q('.rumo-enem-snapshot-v3',head);
     if(!box){box=document.createElement('aside');box.className='rumo-enem-snapshot-v3';head.appendChild(box)}
     const d=api.data,accuracy=d.stats.attempts?Math.round(d.stats.correct/d.stats.attempts*100):0,topics=d.topics.length;
-    box.innerHTML=`<small>SEU ENEM NO RUMO</small><div class="rumo-snapshot-grid-v3"><div><b>${d.questionCount}</b><span>questões ativas</span></div><div><b>${topics}</b><span>assuntos mapeados</span></div><div><b>${d.stats.attempts}</b><span>respondidas</span></div><div><b>${accuracy}%</b><span>acerto atual</span></div></div>`;
-    const source=q('#enem .rumo-source-link');if(source)box.appendChild(source);
+    box.innerHTML=`<small>SEU ENEM NO RUMO</small><div class="rumo-snapshot-grid-v3"><div><b>${d.questionCount}</b><span>questões ativas</span></div><div><b>${topics}</b><span>assuntos mapeados</span></div><div><b>${d.stats.attempts}</b><span>respondidas</span></div><div><b>${accuracy}%</b><span>acerto atual</span></div></div><a class="rumo-source-link" href="${MATRIX_URL}" target="_blank" rel="noopener noreferrer">Matriz oficial do Inep ↗</a>`;
   }
 
   function overview(){
@@ -72,11 +74,11 @@
   }
 
   function enhanceEnem(){snapshot();overview();decorateAreaActions();navGroups();eden()}
-
   function boot(){font();brand();topbar();navGroups();eden();enhanceEnem();document.body.dataset.rumoShell='nexo-v3'}
+
   document.addEventListener('rumo:enem-ready',enhanceEnem);
   document.addEventListener('rumo:booted',boot,{once:true});
   document.addEventListener('rumo:tab',e=>context(e.detail?.id));
-  document.addEventListener('rumo:context',()=>{snapshot()});
+  document.addEventListener('rumo:context',snapshot);
   boot();
 })();

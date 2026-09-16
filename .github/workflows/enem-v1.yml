@@ -1,7 +1,7 @@
 name: Validate RUMO ENEM v1
 on:
   push:
-    branches: [rumo-enem-v1]
+    branches: [rumo-enem-v1, rumo-enem-v2-visual]
   pull_request:
     branches: [master]
 
@@ -17,6 +17,7 @@ jobs:
         run: |
           node --check app/enem-core-v1.js
           node --check app/enem-visual-v2.js
+          node --check app/rumo-shell-v3.js
           node --check app/enem-practice-v1.js
           node --check app/enem-essay-v1.js
           node --check app/enem-mock-v1.js
@@ -24,11 +25,13 @@ jobs:
           node --check sw.js
       - name: Check ENEM security and product contracts
         run: |
-          grep -q "RELEASE='10-enem-v1'" app/bootstrap.js
+          grep -q "RELEASE='10-enem-v2'" app/bootstrap.js
           grep -q "enem-v1.css" app/bootstrap.js
           grep -q "enem-visual-v2.css" app/bootstrap.js
+          grep -q "rumo-shell-v3.css" app/bootstrap.js
           grep -q "enem-core-v1.js" app/bootstrap.js
           grep -q "enem-visual-v2.js" app/bootstrap.js
+          grep -q "rumo-shell-v3.js" app/bootstrap.js
           grep -q "enem-practice-v1.js" app/bootstrap.js
           grep -q "enem-essay-v1.js" app/bootstrap.js
           grep -q "enem-mock-v1.js" app/bootstrap.js
@@ -37,13 +40,13 @@ jobs:
           ! grep -q "rumo_check_answer" app/enem-practice-v1.js app/enem-mock-v1.js
           grep -q "SUPABASE_SERVICE_ROLE_KEY" supabase/functions/check-enem-answer/index.ts
           grep -q "body_too_large" supabase/functions/check-enem-answer/index.ts
-          grep -q "rumo-static-.*v4\|CACHE_NAME=.*v4" sw.js
-          grep -q "enem-core-v1.js" sw.js
-          grep -q "enem-visual-v2.js" sw.js
-          grep -q "enem-v1.css" sw.js
-          grep -q "enem-visual-v2.css" sw.js
-          grep -q "prefers-reduced-motion" enem-visual-v2.css
+          grep -q "rumo-static-.*v5\|CACHE_NAME=.*v5" sw.js
+          grep -q "rumo-shell-v3.js" sw.js
+          grep -q "rumo-shell-v3.css" sw.js
+          grep -q "prefers-reduced-motion" rumo-shell-v3.css
           grep -q "rumoIconSystem='iconoir'" app/enem-visual-v2.js
+          grep -q "rumoShell='nexo-v3'" app/rumo-shell-v3.js
+          grep -q "eden-mark-v3" rumo-shell-v3.css app/rumo-shell-v3.js
 
   browser-smoke:
     needs: contracts
@@ -66,30 +69,42 @@ jobs:
           const {chromium}=require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            for(const viewport of [{width:1366,height:900},{width:390,height:844}]){
+            for(const viewport of [{width:1366,height:900},{width:390,height:844},{width:360,height:800}]){
               const page=await browser.newPage({viewport});
               await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
               await page.waitForFunction(()=>document.documentElement.dataset.rumoBoot==='ready',{timeout:20000});
               await page.waitForSelector('[data-tab="enem"]',{timeout:10000});
               const labels=await page.locator('.sidebar nav .nav').allTextContents();
               for(const expected of ['Hoje','ENEM','Questões','Redação','Simulados','Concursos','Revisões'])if(!labels.some(x=>x.includes(expected)))throw new Error(`missing nav ${expected}`);
-              const iconSystem=await page.evaluate(()=>document.body.dataset.rumoIconSystem);
-              if(iconSystem!=='iconoir')throw new Error(`wrong icon system: ${iconSystem}`);
+              const visual=await page.evaluate(()=>({icons:document.body.dataset.rumoIconSystem,shell:document.body.dataset.rumoShell}));
+              if(visual.icons!=='iconoir'||visual.shell!=='nexo-v3')throw new Error(`wrong visual system: ${JSON.stringify(visual)}`);
               const iconCount=await page.locator('.sidebar nav .nav .nav-icon svg').count();
               if(iconCount<7)throw new Error(`missing SVG navigation icons: ${iconCount}`);
+              const eden=await page.locator('.eden-word-v3').textContent();
+              if(eden?.trim()!=='eden')throw new Error(`EDEN lockup missing: ${eden}`);
               const go=async id=>{
-                if(viewport.width<=760){
+                if(viewport.width<=780){
                   await page.locator('#menu').click();
                   await page.waitForFunction(()=>document.querySelector('.sidebar')?.classList.contains('open'));
                 }
                 await page.locator(`[data-tab="${id}"]`).click();
               };
+              await go('enem');
+              await page.waitForSelector('.rumo-enem-content-v3',{timeout:15000});
+              const areas=await page.locator('.rumo-area-row').count();
+              if(areas!==5)throw new Error(`expected 5 ENEM areas, got ${areas}`);
+              if(viewport.width>780){
+                const cols=await page.locator('.rumo-area-list').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
+                if(cols<2)throw new Error(`desktop ENEM areas are still single-column: ${cols}`);
+              }
+              let overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
+              if(overflow)throw new Error(`horizontal overflow on ENEM at ${viewport.width}`);
               await go('questoes');
               await page.waitForSelector('[data-enem-answer]',{timeout:15000});
               await page.locator('[data-enem-answer]').first().click();
               await page.waitForSelector('.rumo-feedback.success, .rumo-feedback.failure',{timeout:15000});
-              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
-              if(overflow)throw new Error(`horizontal overflow at ${viewport.width}`);
+              overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
+              if(overflow)throw new Error(`horizontal overflow on questions at ${viewport.width}`);
               await go('redacao');
               await page.waitForSelector('#enem-essay-text');
               await page.locator('#enem-essay-text').fill('Rascunho de teste local.');
@@ -97,6 +112,6 @@ jobs:
               await page.close();
             }
             await browser.close();
-            console.log('ENEM desktop/mobile visual smoke ok');
+            console.log('ENEM dense visual desktop/mobile smoke ok');
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

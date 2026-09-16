@@ -76,10 +76,32 @@ The EDEN family mark is mandatory but discreet:
 ## Typography and spacing
 
 - RUMO working surfaces use Plus Jakarta Sans with system fallbacks.
-- Essential text cannot rely on microtype; 8–10 px text is limited to metadata/kickers only.
-- Desktop content should normally stay around 1180 px or less rather than stretching across ultrawide screens.
+- Desktop application base text targets **15–16 px**. Navigation targets about **14 px**. Forms and long reading/editing surfaces target **15–16 px**.
+- Essential text must not use microtype. Text below 12 px is reserved only for short metadata/kickers and cannot carry instructions, choices, errors or primary information.
+- Question alternatives, selection cards and account forms must remain comfortably readable on a 1366/1440 desktop without browser zoom.
+- Desktop content should normally stay around 1180–1220 px rather than stretching across ultrawide screens.
 - Prefer two-column information density when it improves scanning; collapse cleanly to one column on mobile.
 - Avoid empty vertical bands created only to make a screen feel "premium".
+
+## Selection surfaces
+
+Cards that represent a real choice must look interactive and intentional:
+- clear border and hover/focus state;
+- selected state uses restrained accent tint and border rather than glow;
+- title around 14–16 px and supporting copy around 12.5–14 px;
+- no arbitrary oversized cards, giant shadows or decorative icons that do not help the decision;
+- selection behavior must also be understandable by keyboard/focus, not only hover.
+
+## Account experience
+
+A RUMO account is a first-class product surface, not a tiny utility:
+- guest state must clearly expose **Entrar / Criar conta**;
+- signed-in state displays the user identity and a clear account entry point;
+- login/signup fields use readable desktop sizing and proper autocomplete semantics;
+- signup distinguishes new-password from current-password and uses a stronger local minimum password length;
+- explain that the account synchronizes plan/progress across devices without implying more than the backend actually stores;
+- account settings, sync and logout actions use text labels instead of emoji UI;
+- guest/local mode may remain useful, but account benefits and persistence must be clear.
 
 ## Mobile / PWA
 
